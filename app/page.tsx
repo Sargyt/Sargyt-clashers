@@ -93,11 +93,29 @@ export default function Home() {
   const [hata, setHata] = useState("");
   const [yukleniyor, setYukleniyor] = useState(false);
   const [oyuncu, setOyuncu] = useState<Oyuncu | null>(null);
+  const [favoriMesaj, setFavoriMesaj] = useState("");
+
+function favoriyeEkle(o: Oyuncu) {
+  try {
+    const eski = JSON.parse(localStorage.getItem("favoriler") || "[]");
+    const liste: { kod: string; isim: string }[] = Array.isArray(eski) ? eski : [];
+    if (liste.some((f) => f.kod === o.kod)) {
+      setFavoriMesaj("Zaten favorilerde.");
+      return;
+    }
+    liste.push({ kod: o.kod, isim: o.isim });
+    localStorage.setItem("favoriler", JSON.stringify(liste));
+    setFavoriMesaj("Favorilere eklendi.");
+  } catch {
+    setFavoriMesaj("Kaydedilemedi.");
+  }
+}
 
   async function ara(e: FormEvent) {
     e.preventDefault();
     const temiz = kod.trim().toUpperCase().replace(/^#/, "").replace(/O/g, "0");
     setOyuncu(null);
+    setFavoriMesaj("");
     if (!KOD_KURALI.test(temiz)) {
       setHata("Geçersiz köy kodu. Örnek: #2PP0Y8L");
       return;
@@ -181,6 +199,20 @@ export default function Home() {
             {oyuncu.klan ? " · Klan: " + oyuncu.klan : ""}
           </p>
 
+<button
+  onClick={() => favoriyeEkle(oyuncu)}
+  style={{
+    padding: "8px 14px",
+    borderRadius: 8,
+    border: "1px solid var(--cizgi)",
+    background: "var(--bg)",
+    color: "var(--fg)",
+    cursor: "pointer",
+  }}
+>
+  ⭐ Favorilere ekle
+</button>
+{favoriMesaj && <span style={{ marginLeft: 8, fontSize: 14 }}>{favoriMesaj}</span>}
           <div style={{ marginTop: 8 }}>
             <strong>Genel ilerleme: %{yuzde(hepsi)}</strong>
             <div style={{ height: 12, background: "var(--cizgi)", borderRadius: 8, overflow: "hidden", marginTop: 6 }}>
