@@ -54,6 +54,7 @@ export async function GET(request: Request) {
     }));
 
     return NextResponse.json({
+      rozet: v.badgeUrls?.large ?? v.badgeUrls?.medium ?? null,
       kod: v.tag,
       isim: v.name,
       aciklama: v.description ?? "",

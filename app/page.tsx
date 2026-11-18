@@ -23,8 +23,8 @@ type Oyuncu = {
   klan: string | null;
   klanKod?: string | null;
   klanRozet?: string | null;
-  ligAdi?: string | null;
-  ligIkonu?: string | null;
+  lig?: string | null;
+  ligIkon?: string | null;
   kahramanlar: Parca[];
   birlikler: Parca[];
   buyuler: Parca[];
@@ -73,6 +73,59 @@ function yuzde(liste: Parca[]) {
   const s = liste.reduce((t, p) => t + p.seviye, 0);
   const m = liste.reduce((t, p) => t + p.azami, 0);
   return m ? Math.round((s / m) * 100) : 0;
+}
+
+function ProfilBbGorsel({ seviye }: { seviye: number }) {
+  const [hata, setHata] = useState(false);
+
+  if (hata) {
+    return (
+      <div
+        style={{
+          width: 104,
+          height: 104,
+          borderRadius: 18,
+          background: "var(--bg)",
+          border: "1px solid var(--cizgi)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <span style={{ fontSize: 34 }}>🏰</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: "var(--vurgu)" }}>BB {seviye}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      title={`Belediye Binası ${seviye}`}
+      style={{
+        width: 108,
+        height: 108,
+        borderRadius: 18,
+        background: "var(--bg)",
+        border: "1px solid var(--cizgi)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 8,
+        flexShrink: 0,
+      }}
+    >
+      <img
+        src={`/birimler/th${seviye}.png`}
+        alt={`Belediye Binası ${seviye}`}
+        width={92}
+        height={92}
+        onError={() => setHata(true)}
+        style={{ objectFit: "contain", display: "block" }}
+      />
+    </div>
+  );
 }
 
 function KahramanKarti({ p }: { p: Parca }) {
@@ -531,48 +584,89 @@ export default function Home() {
             {/* Sol Kart: Oyuncu Profil Kartı */}
             <section
               style={{
-                padding: 24,
+                padding: "26px 28px",
                 background: "var(--kart)",
                 border: "1px solid var(--cizgi)",
                 borderRadius: 16,
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
-                gap: 18,
+                justifyContent: "center",
+                gap: 14,
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  {oyuncu.ligIkonu && (
-                    <img
-                      src={oyuncu.ligIkonu}
-                      alt={oyuncu.ligAdi ?? "Lig"}
-                      width={56}
-                      height={56}
-                      style={{ flexShrink: 0 }}
-                    />
-                  )}
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                      <h2 style={{ margin: 0, fontSize: 26, fontWeight: 900 }}>{oyuncu.isim}</h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: 0 }}>
+                  {/* Büyük Belediye Binası Görseli */}
+                  <ProfilBbGorsel seviye={oyuncu.thSeviyesi} />
+
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                      <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900, lineHeight: 1.15 }}>{oyuncu.isim}</h2>
                       <span
                         style={{
-                          padding: "5px 12px",
+                          padding: "6px 14px",
                           borderRadius: 10,
                           background: "var(--vurgu)",
                           color: "#111",
                           fontWeight: 800,
-                          fontSize: 14,
+                          fontSize: 15,
                         }}
                       >
-                        🏰 Belediye {oyuncu.thSeviyesi}
+                        Belediye {oyuncu.thSeviyesi}
                       </span>
                     </div>
-                    <p style={{ opacity: 0.75, margin: "6px 0 0", fontSize: 15 }}>
-                      {oyuncu.kod} · 🏆 {oyuncu.kupa} Kupa {oyuncu.ligAdi ? `(${oyuncu.ligAdi})` : ""}
-                    </p>
-                    <p style={{ opacity: 0.9, margin: "6px 0 0", fontSize: 15, fontWeight: 600 }}>
-                      🛡️{" "}
+
+                    {/* Güncel Lig İkonu + Kupa Bilgisi */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 9,
+                        margin: "10px 0 0",
+                        fontSize: 16,
+                        opacity: 0.9,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>{oyuncu.kod}</span>
+                      <span>·</span>
+                      {oyuncu.ligIkon && (
+                        <img
+                          src={oyuncu.ligIkon}
+                          alt={oyuncu.lig ?? "Lig"}
+                          width={34}
+                          height={34}
+                          style={{ objectFit: "contain", flexShrink: 0 }}
+                        />
+                      )}
+                      <span>
+                        🏆 <strong>{oyuncu.kupa}</strong> {oyuncu.lig ? `(${oyuncu.lig})` : ""}
+                      </span>
+                    </div>
+
+                    {/* Klan Flaması (Rozeti) + Klan Linki */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        margin: "10px 0 0",
+                        fontSize: 17,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {oyuncu.klanRozet ? (
+                        <img
+                          src={oyuncu.klanRozet}
+                          alt={oyuncu.klan ?? "Klan"}
+                          width={34}
+                          height={34}
+                          style={{ objectFit: "contain", flexShrink: 0 }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: 22 }}>🛡️</span>
+                      )}
+
                       {oyuncu.klan && oyuncu.klanKod ? (
                         <Link
                           href={"/klanlar?kod=" + oyuncu.klanKod.replace(/^#/, "")}
@@ -582,11 +676,11 @@ export default function Home() {
                           {oyuncu.klan} ↗
                         </Link>
                       ) : oyuncu.klan ? (
-                        oyuncu.klan
+                        <span>{oyuncu.klan}</span>
                       ) : (
-                        "Klanı yok"
+                        <span style={{ opacity: 0.7 }}>Klanı yok</span>
                       )}
-                    </p>
+                    </div>
                   </div>
                 </div>
 
@@ -595,21 +689,23 @@ export default function Home() {
                   onClick={() => favoriyeEkle(oyuncu)}
                   title="Favorilere ekle"
                   style={{
-                    padding: "10px 14px",
+                    padding: "12px 16px",
                     borderRadius: 12,
                     border: favoriEklendi ? "1px solid #f59e0b" : "1px solid var(--cizgi)",
                     background: favoriEklendi ? "rgba(245, 158, 11, 0.15)" : "var(--bg)",
                     color: favoriEklendi ? "#f59e0b" : "var(--fg)",
                     cursor: "pointer",
-                    fontSize: 18,
+                    fontSize: 19,
                     fontWeight: 700,
                     display: "flex",
                     alignItems: "center",
                     gap: 6,
+                    flexShrink: 0,
+                    alignSelf: "flex-start",
                   }}
                 >
                   <span>{favoriEklendi ? "★" : "☆"}</span>
-                  <span style={{ fontSize: 13 }}>{favoriEklendi ? "Favoride" : "Favori"}</span>
+                  <span style={{ fontSize: 14 }}>{favoriEklendi ? "Favoride" : "Favori"}</span>
                 </button>
               </div>
 

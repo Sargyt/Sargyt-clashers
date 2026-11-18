@@ -12,6 +12,7 @@ const TEMALAR = [
 const LINKLER = [
   { href: "/", ad: "Ana Sayfa" },
   { href: "/klanlar", ad: "Klanlar" },
+  { href: "/karsilastir", ad: "VS Karşılaştır" },
   { href: "/ordular", ad: "Ordular" },
   { href: "/ansiklopedi", ad: "Rehber" },
   { href: "/hesaplayici", ad: "Hesaplayıcı" },

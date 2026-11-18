@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
-type Ekipman = { name: string; level: number; maxLevel: number };
 type Parca = {
   name: string;
   level: number;
   maxLevel: number;
   village?: string;
-  equipment?: Ekipman[];
+  equipment?: { name: string; level: number; maxLevel: number }[];
 };
 
 function ana(liste: Parca[] | undefined) {
@@ -18,15 +17,11 @@ function ana(liste: Parca[] | undefined) {
       isim: p.name,
       seviye: p.level,
       azami: p.maxLevel,
-      ...(p.equipment
-        ? {
-            aktifEkipmanlar: p.equipment.map((e) => ({
-              isim: e.name,
-              seviye: e.level,
-              azami: e.maxLevel,
-            })),
-          }
-        : {}),
+      aktifEkipmanlar: (p.equipment ?? []).map((e) => ({
+        isim: e.name,
+        seviye: e.level,
+        azami: e.maxLevel,
+      })),
     }));
 }
 
@@ -66,11 +61,11 @@ export async function GET(request: Request) {
       isim: v.name,
       thSeviyesi: v.townHallLevel,
       kupa: v.trophies,
+      lig: v.league?.name ?? null,
+      ligIkon: v.league?.iconUrls?.medium ?? v.league?.iconUrls?.small ?? null,
       klan: v.clan?.name ?? null,
       klanKod: v.clan?.tag ?? null,
-      klanRozet: v.clan?.badgeUrls?.medium ?? null,
-      ligAdi: v.league?.name ?? null,
-      ligIkonu: v.league?.iconUrls?.medium ?? null,
+      klanRozet: v.clan?.badgeUrls?.medium ?? v.clan?.badgeUrls?.small ?? null,
       kahramanlar: ana(v.heroes),
       birlikler: ana(v.troops),
       buyuler: ana(v.spells),
