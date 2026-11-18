@@ -2,6 +2,8 @@
 import { useState, type FormEvent } from "react";
 import { tr } from "./isimler";
 import { supabase } from "./supabase";
+import { gercekAzami } from "./thSinirlari";
+
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
 type Parca = { isim: string; seviye: number; azami: number };
@@ -67,6 +69,7 @@ function Bolum({ baslik, liste }: { baslik: string; liste: Parca[] }) {
     </div>
   );
 }
+
 function Eksikler({ baslik, liste }: { baslik: string; liste: Parca[] }) {
   const eksik = liste
     .filter((p) => p.seviye < p.azami)
@@ -96,33 +99,33 @@ export default function Home() {
   const [oyuncu, setOyuncu] = useState<Oyuncu | null>(null);
   const [favoriMesaj, setFavoriMesaj] = useState("");
 
-async function favoriyeEkle(o: Oyuncu) {
-  const { data } = await supabase.auth.getSession();
-  if (data.session) {
-    const { error } = await supabase
-      .from("favoriler")
-      .insert({ kod: o.kod, isim: o.isim.slice(0, 40) });
-    if (error) {
-      setFavoriMesaj(error.code === "23505" ? "Zaten favorilerde." : "Kaydedilemedi.");
-    } else {
-      setFavoriMesaj("Hesabına eklendi.");
-    }
-    return;
-  }
-  try {
-    const eski = JSON.parse(localStorage.getItem("favoriler") || "[]");
-    const liste: { kod: string; isim: string }[] = Array.isArray(eski) ? eski : [];
-    if (liste.some((f) => f.kod === o.kod)) {
-      setFavoriMesaj("Zaten favorilerde.");
+  async function favoriyeEkle(o: Oyuncu) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      const { error } = await supabase
+        .from("favoriler")
+        .insert({ kod: o.kod, isim: o.isim.slice(0, 40) });
+      if (error) {
+        setFavoriMesaj(error.code === "23505" ? "Zaten favorilerde." : "Kaydedilemedi.");
+      } else {
+        setFavoriMesaj("Hesabına eklendi.");
+      }
       return;
     }
-    liste.push({ kod: o.kod, isim: o.isim });
-    localStorage.setItem("favoriler", JSON.stringify(liste));
-    setFavoriMesaj("Bu tarayıcıya eklendi. Hesabına kaydetmek için giriş yap.");
-  } catch {
-    setFavoriMesaj("Kaydedilemedi.");
+    try {
+      const eski = JSON.parse(localStorage.getItem("favoriler") || "[]");
+      const liste: { kod: string; isim: string }[] = Array.isArray(eski) ? eski : [];
+      if (liste.some((f) => f.kod === o.kod)) {
+        setFavoriMesaj("Zaten favorilerde.");
+        return;
+      }
+      liste.push({ kod: o.kod, isim: o.isim });
+      localStorage.setItem("favoriler", JSON.stringify(liste));
+      setFavoriMesaj("Bu tarayıcıya eklendi. Hesabına kaydetmek için giriş yap.");
+    } catch {
+      setFavoriMesaj("Kaydedilemedi.");
+    }
   }
-}
 
   async function ara(e: FormEvent) {
     e.preventDefault();
@@ -141,7 +144,15 @@ async function favoriyeEkle(o: Oyuncu) {
       if (!yanit.ok) {
         setHata(veri.hata ?? "Bir sorun oluştu");
       } else {
-        setOyuncu(veri);
+        const guncelKahramanlar = veri.kahramanlar.map((k: Parca) => ({
+          ...k,
+          azami: gercekAzami(veri.thSeviyesi, k.isim, k.azami),
+        }));
+
+        setOyuncu({
+          ...veri,
+          kahramanlar: guncelKahramanlar,
+        });
       }
     } catch {
       setHata("Bağlantı hatası, tekrar dene.");
@@ -212,31 +223,34 @@ async function favoriyeEkle(o: Oyuncu) {
             {oyuncu.klan ? " · Klan: " + oyuncu.klan : ""}
           </p>
 
-<button
-  onClick={() => favoriyeEkle(oyuncu)}
-  style={{
-    padding: "8px 14px",
-    borderRadius: 8,
-    border: "1px solid var(--cizgi)",
-    background: "var(--bg)",
-    color: "var(--fg)",
-    cursor: "pointer",
-  }}
->
-  ⭐ Favorilere ekle
-</button>
-{favoriMesaj && <span style={{ marginLeft: 8, fontSize: 14 }}>{favoriMesaj}</span>}
+          <button
+            onClick={() => favoriyeEkle(oyuncu)}
+            style={{
+              padding: "8px 14px",
+              borderRadius: 8,
+              border: "1px solid var(--cizgi)",
+              background: "var(--bg)",
+              color: "var(--fg)",
+              cursor: "pointer",
+            }}
+          >
+            ⭐ Favorilere ekle
+          </button>
+          {favoriMesaj && <span style={{ marginLeft: 8, fontSize: 14 }}>{favoriMesaj}</span>}
+
           <div style={{ marginTop: 8 }}>
             <strong>Genel ilerleme: %{yuzde(hepsi)}</strong>
             <div style={{ height: 12, background: "var(--cizgi)", borderRadius: 8, overflow: "hidden", marginTop: 6 }}>
               <div style={{ height: "100%", width: yuzde(hepsi) + "%", background: "var(--vurgu)" }} />
             </div>
           </div>
+
           <Eksikler baslik="Kalan: Kahramanlar" liste={oyuncu.kahramanlar} />
           <Eksikler baslik="Kalan: Birlikler" liste={normal} />
           <Eksikler baslik="Kalan: Büyüler" liste={oyuncu.buyuler} />
           <Eksikler baslik="Kalan: Evcil Hayvanlar" liste={petler} />
           <Eksikler baslik="Kalan: Ekipmanlar" liste={oyuncu.ekipmanlar} />
+
           <Bolum baslik="Kahramanlar" liste={oyuncu.kahramanlar} />
           <Bolum baslik="Ekipmanlar" liste={oyuncu.ekipmanlar} />
           <Bolum baslik="Birlikler" liste={normal} />
