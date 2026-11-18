@@ -66,6 +66,27 @@ function Bolum({ baslik, liste }: { baslik: string; liste: Parca[] }) {
     </div>
   );
 }
+function Eksikler({ baslik, liste }: { baslik: string; liste: Parca[] }) {
+  const eksik = liste
+    .filter((p) => p.seviye < p.azami)
+    .sort((a, b) => b.azami - b.seviye - (a.azami - a.seviye))
+    .slice(0, 5);
+
+  if (eksik.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      <h3 style={{ marginBottom: 8 }}>{baslik}</h3>
+      <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14 }}>
+        {eksik.map((p) => (
+          <li key={p.isim} style={{ marginBottom: 4 }}>
+            {p.isim}: {p.azami - p.seviye} seviye kaldı ({p.seviye}/{p.azami})
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
 
 export default function Home() {
   const [kod, setKod] = useState("");
@@ -166,7 +187,11 @@ export default function Home() {
               <div style={{ height: "100%", width: yuzde(hepsi) + "%", background: "var(--vurgu)" }} />
             </div>
           </div>
-
+          <Eksikler baslik="Kalan: Kahramanlar" liste={oyuncu.kahramanlar} />
+          <Eksikler baslik="Kalan: Birlikler" liste={normal} />
+          <Eksikler baslik="Kalan: Büyüler" liste={oyuncu.buyuler} />
+          <Eksikler baslik="Kalan: Evcil Hayvanlar" liste={petler} />
+          <Eksikler baslik="Kalan: Ekipmanlar" liste={oyuncu.ekipmanlar} />
           <Bolum baslik="Kahramanlar" liste={oyuncu.kahramanlar} />
           <Bolum baslik="Ekipmanlar" liste={oyuncu.ekipmanlar} />
           <Bolum baslik="Birlikler" liste={normal} />
