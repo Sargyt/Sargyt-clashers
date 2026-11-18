@@ -3,18 +3,14 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { supabase } from "../supabase";
 
-// BURAYA KENDİ ADMİN E-POSTA ADRESİNİ YAZ:
 const ADMIN_EPOSTALAR = ["sargytr0@gmail.com"];
 
-// Önden engellenecek küfür, hakaret ve Supercell Hizmet Şartları ihlal kalıpları
 const YASAKLI_KELIMELER = [
-  // Supercell Hizmet Şartları İhlalleri (Hesap satışı, hile, bot vb.)
   "hesap satilik", "hesap satılık", "hesap satiyorum", "hesap satıyorum",
   "koy satilik", "köy satılık", "hesap takas", "koy takas", "köy takas",
   "bedava tas", "bedava taş", "ucretsiz tas", "ücretsiz taş",
   "gem hilesi", "tas hilesi", "taş hilesi", "elmas hilesi",
   "mod apk", "hile apk", "bot indir", "oto saldiri bot",
-  // Ağır küfür ve hakaret kalıpları
   "amk", "aq", "orospu", "pic", "piç", "yarrak", "yarak", "sikik", "siktir",
   "sikeyim", "götveren", "gotveren", "ibne", "pezevenk", "kahpe", "oc", "oç",
 ];
@@ -42,7 +38,7 @@ function metinKontrolEt(hamMetin: string): string | null {
 
     const regex = new RegExp(`(^|\\s)${normYasak}(\\s|$)`, "i");
     if (regex.test(temiz) || (normYasak.length >= 5 && temiz.includes(normYasak))) {
-      return "Paylaşımınız topluluk kurallarına veya Supercell Hizmet Şartları'na (hesap satışı/takası, hile, hakaret vb.) aykırı ifadeler içerdiği için engellendi.";
+      return "Paylaşımınız topluluk kurallarına veya Supercell Hizmet Şartları'na aykırı ifadeler içerdiği için engellendi.";
     }
   }
   return null;
@@ -61,7 +57,10 @@ type Konu = {
   baslik: string;
   kategori: "Saldırı Taktikleri" | "Köy Düzeni" | "Klan Alımı" | "Soru & Cevap";
   yazar: string;
+  yazar_email?: string | null;
   icerik: string;
+  oylar: number;
+  kapali: boolean;
   created_at: string;
   yorumlar: Yorum[];
 };
@@ -82,7 +81,11 @@ export default function ForumSayfasi() {
   const [konular, setKonular] = useState<Konu[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [seciliKategori, setSeciliKategori] = useState<(typeof KATEGORILER)[number]>("Tümü");
+  const [sirala, setSirala] = useState<"yeni" | "trend" | "yorum">("yeni");
+  const [aramaMetni, setAramaMetni] = useState("");
+  const [durumFiltre, setDurumFiltre] = useState<"hepsi" | "acik" | "cozuldu">("hepsi");
   const [kullaniciEmail, setKullaniciEmail] = useState<string | null>(null);
+  const [oyVerilenler, setOyVerilenler] = useState<string[]>([]);
 
   // Yeni konu formu
   const [yeniFormAcik, setYeniFormAcik] = useState(false);
@@ -115,7 +118,10 @@ export default function ForumSayfasi() {
           baslik: k.baslik,
           kategori: k.kategori as Konu["kategori"],
           yazar: k.yazar,
+          yazar_email: k.yazar_email ?? null,
           icerik: k.icerik,
+          oylar: k.oylar ?? 0,
+          kapali: Boolean(k.kapali),
           created_at: k.created_at,
           yorumlar: (yorumVeri ?? []).filter((y) => y.konu_id === k.id),
         }));
@@ -129,21 +135,30 @@ export default function ForumSayfasi() {
   }, []);
 
   useEffect(() => {
-    async function baslat() {
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user?.email) {
-        setKullaniciEmail(data.session.user.email);
-      }
-      await konulariGetir();
-    }
-    baslat();
+    try {
+      const kayitOylar = JSON.parse(localStorage.getItem("sargyt_forum_oylar") || "[]");
+      if (Array.isArray(kayitOylar)) setOyVerilenler(kayitOylar);
+    } catch {}
+
+    supabase.auth.getSession().then(({ data }) => {
+      setKullaniciEmail(data.session?.user?.email ?? null);
+    });
+
+    const { data: dinleyici } = supabase.auth.onAuthStateChange((_event, session) => {
+      setKullaniciEmail(session?.user?.email ?? null);
+    });
+
+    konulariGetir();
+
+    return () => {
+      dinleyici.subscription.unsubscribe();
+    };
   }, [konulariGetir]);
 
   async function konuOlustur(e: FormEvent) {
     e.preventDefault();
     if (!baslik.trim() || !icerik.trim() || gonderiliyor) return;
 
-    // 1. Katman: Önden Küfür & Supercell Kural İhlali Kontrolü
     const engel = metinKontrolEt(baslik + " " + icerik);
     if (engel) {
       setUyariMesaji(engel);
@@ -164,7 +179,10 @@ export default function ForumSayfasi() {
         baslik: baslik.trim(),
         kategori,
         yazar: yazarAdi,
+        yazar_email: kullaniciEmail,
         icerik: icerik.trim(),
+        oylar: 1,
+        kapali: false,
       })
       .select()
       .single();
@@ -175,7 +193,10 @@ export default function ForumSayfasi() {
         baslik: data.baslik,
         kategori: data.kategori,
         yazar: data.yazar,
+        yazar_email: data.yazar_email,
         icerik: data.icerik,
+        oylar: data.oylar ?? 1,
+        kapali: false,
         created_at: data.created_at,
         yorumlar: [],
       };
@@ -188,8 +209,38 @@ export default function ForumSayfasi() {
     setGonderiliyor(false);
   }
 
-  async function yorumEkle(konuId: string) {
-    if (!yorumMetni.trim() || yorumGonderiliyor) return;
+  async function oyVer(konu: Konu) {
+    if (oyVerilenler.includes(konu.id)) return;
+    const yeniOy = (konu.oylar ?? 0) + 1;
+
+    setKonular((prev) =>
+      prev.map((k) => (k.id === konu.id ? { ...k, oylar: yeniOy } : k))
+    );
+    const guncelOylar = [...oyVerilenler, konu.id];
+    setOyVerilenler(guncelOylar);
+    try {
+      localStorage.setItem("sargyt_forum_oylar", JSON.stringify(guncelOylar));
+    } catch {}
+
+    await supabase.from("forum_konular").update({ oylar: yeniOy }).eq("id", konu.id);
+  }
+
+  async function durumDegistir(konu: Konu) {
+    const yeniDurum = !konu.kapali;
+    const { error } = await supabase
+      .from("forum_konular")
+      .update({ kapali: yeniDurum })
+      .eq("id", konu.id);
+
+    if (!error) {
+      setKonular((prev) =>
+        prev.map((k) => (k.id === konu.id ? { ...k, kapali: yeniDurum } : k))
+      );
+    }
+  }
+
+  async function yorumEkle(konu: Konu) {
+    if (konu.kapali || !yorumMetni.trim() || yorumGonderiliyor) return;
 
     const engel = metinKontrolEt(yorumMetni);
     if (engel) {
@@ -207,7 +258,7 @@ export default function ForumSayfasi() {
     const { data, error } = await supabase
       .from("forum_yorumlar")
       .insert({
-        konu_id: konuId,
+        konu_id: konu.id,
         yazar: yazarAdi,
         icerik: yorumMetni.trim(),
       })
@@ -217,7 +268,7 @@ export default function ForumSayfasi() {
     if (!error && data) {
       setKonular((prev) =>
         prev.map((k) =>
-          k.id === konuId ? { ...k, yorumlar: [...k.yorumlar, data] } : k
+          k.id === konu.id ? { ...k, yorumlar: [...k.yorumlar, data] } : k
         )
       );
       setYorumMetni("");
@@ -225,7 +276,6 @@ export default function ForumSayfasi() {
     setYorumGonderiliyor(false);
   }
 
-  // 2. Katman: Admin Konu Silme
   async function konuSil(konuId: string) {
     if (!adminMi) return;
     if (!confirm("Bu konuyu ve altındaki tüm yorumları kalıcı olarak silmek istiyor musun?")) return;
@@ -233,12 +283,9 @@ export default function ForumSayfasi() {
     const { error } = await supabase.from("forum_konular").delete().eq("id", konuId);
     if (!error) {
       setKonular((prev) => prev.filter((k) => k.id !== konuId));
-    } else {
-      alert("Silme yetkisi doğrulanamadı. Supabase SQL Editor'de admin delete politikasını çalıştırdığından emin ol.");
     }
   }
 
-  // 2. Katman: Admin Yorum Silme
   async function yorumSil(konuId: string, yorumId: string) {
     if (!adminMi) return;
     const { error } = await supabase.from("forum_yorumlar").delete().eq("id", yorumId);
@@ -251,9 +298,27 @@ export default function ForumSayfasi() {
     }
   }
 
-  const filtrelenmis = konular.filter(
-    (k) => seciliKategori === "Tümü" || k.kategori === seciliKategori
-  );
+  const filtrelenmis = konular
+    .filter((k) => seciliKategori === "Tümü" || k.kategori === seciliKategori)
+    .filter((k) => {
+      if (durumFiltre === "acik") return !k.kapali;
+      if (durumFiltre === "cozuldu") return k.kapali;
+      return true;
+    })
+    .filter((k) => {
+      if (!aramaMetni.trim()) return true;
+      const q = aramaMetni.toLowerCase();
+      return (
+        k.baslik.toLowerCase().includes(q) ||
+        k.icerik.toLowerCase().includes(q) ||
+        k.yazar.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      if (sirala === "trend") return (b.oylar ?? 0) - (a.oylar ?? 0);
+      if (sirala === "yorum") return b.yorumlar.length - a.yorumlar.length;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   return (
     <main style={{ padding: "36px 32px", maxWidth: 1360, width: "100%", margin: "0 auto" }}>
@@ -265,7 +330,7 @@ export default function ForumSayfasi() {
           alignItems: "center",
           flexWrap: "wrap",
           gap: 16,
-          marginBottom: 24,
+          marginBottom: 20,
         }}
       >
         <div>
@@ -287,7 +352,7 @@ export default function ForumSayfasi() {
             )}
           </div>
           <p style={{ opacity: 0.75, margin: "8px 0 0", fontSize: 16 }}>
-            Saldırı taktiklerini tartış, köy düzeni önerileri al veya klanına yeni savaşçılar davet et.
+            Beğendiğin konulara oy vererek trende çıkar, çözüme ulaşan tartışmaları kapatarak arşive ekle.
           </p>
         </div>
 
@@ -331,21 +396,6 @@ export default function ForumSayfasi() {
         </div>
       </div>
 
-      {/* TOPLULUK & SUPERCELL KURAL BİLGİLENDİRME ŞERİDİ */}
-      <div
-        style={{
-          padding: "12px 18px",
-          borderRadius: 12,
-          background: "var(--kart)",
-          border: "1px solid var(--cizgi)",
-          fontSize: 13,
-          opacity: 0.85,
-          marginBottom: 20,
-        }}
-      >
-        🛡️ <strong>Topluluk Kuralları:</strong> Supercell Hizmet Şartları gereği <strong>hesap satışı/takası, hile/bot paylaşımı</strong> ve hakaret içeren mesajlar otomatik olarak engellenir.
-      </div>
-
       {/* YENİ KONU AÇMA FORMU */}
       {yeniFormAcik && (
         <form
@@ -365,11 +415,11 @@ export default function ForumSayfasi() {
             <strong style={{ fontSize: 19 }}>Yeni Tartışma Başlat</strong>
             {!kullaniciEmail && (
               <span style={{ fontSize: 13, opacity: 0.75 }}>
-                Kendi kullanıcı adınla yazmak için{" "}
+                Açtığın konuyu ileride &quot;Çözüldü&quot; olarak kapatabilmek için{" "}
                 <Link href="/giris" style={{ color: "var(--vurgu)" }}>
-                  giriş yap
-                </Link>
-                .
+                  giriş yapman
+                </Link>{" "}
+                önerilir.
               </span>
             )}
           </div>
@@ -463,29 +513,107 @@ export default function ForumSayfasi() {
         </form>
       )}
 
-      {/* KATEGORİ FİLTRELERİ */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-        {KATEGORILER.map((kat) => {
-          const aktif = seciliKategori === kat;
-          return (
-            <button
-              key={kat}
-              onClick={() => setSeciliKategori(kat)}
-              style={{
-                padding: "9px 16px",
-                borderRadius: 10,
-                border: aktif ? "1px solid var(--vurgu)" : "1px solid var(--cizgi)",
-                background: aktif ? "var(--vurgu)" : "var(--kart)",
-                color: aktif ? "#111" : "var(--fg)",
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              {kat}
-            </button>
-          );
-        })}
+      {/* ARAMA, SIRALAMA VE DURUM FİLTRESİ ÇUBUĞU */}
+      <div
+        style={{
+          padding: 16,
+          borderRadius: 14,
+          background: "var(--kart)",
+          border: "1px solid var(--cizgi)",
+          marginBottom: 18,
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+        }}
+      >
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <input
+            value={aramaMetni}
+            onChange={(e) => setAramaMetni(e.target.value)}
+            placeholder="🔍 Konularda veya geçmiş çözümlerde ara..."
+            style={{
+              flex: 1,
+              minWidth: 240,
+              padding: "10px 14px",
+              borderRadius: 10,
+              border: "1px solid var(--cizgi)",
+              background: "var(--bg)",
+              color: "var(--fg)",
+              fontSize: 14,
+            }}
+          />
+
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {(
+              [
+                { id: "yeni", ad: "🆕 En Yeni" },
+                { id: "trend", ad: "🔥 Trend (En Çok Oy)" },
+                { id: "yorum", ad: "💬 En Çok Yorum" },
+              ] as const
+            ).map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setSirala(s.id)}
+                style={{
+                  padding: "9px 14px",
+                  borderRadius: 10,
+                  border: sirala === s.id ? "1px solid var(--vurgu)" : "1px solid var(--cizgi)",
+                  background: sirala === s.id ? "var(--vurgu)" : "var(--bg)",
+                  color: sirala === s.id ? "#111" : "var(--fg)",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
+                {s.ad}
+              </button>
+            ))}
+          </div>
+
+          <select
+            value={durumFiltre}
+            onChange={(e) => setDurumFiltre(e.target.value as "hepsi" | "acik" | "cozuldu")}
+            style={{
+              padding: "9px 12px",
+              borderRadius: 10,
+              border: "1px solid var(--cizgi)",
+              background: "var(--bg)",
+              color: "var(--fg)",
+              fontSize: 13,
+              fontWeight: 700,
+            }}
+          >
+            <option value="hepsi">Tüm Konular</option>
+            <option value="acik">🟢 Açık Tartışmalar</option>
+            <option value="cozuldu">✅ Çözüldü / Arşiv</option>
+          </select>
+        </div>
+
+        {/* KATEGORİ FİLTRELERİ */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {KATEGORILER.map((kat) => {
+            const aktif = seciliKategori === kat;
+            return (
+              <button
+                key={kat}
+                onClick={() => setSeciliKategori(kat)}
+                style={{
+                  padding: "7px 14px",
+                  borderRadius: 9,
+                  border: aktif ? "1px solid var(--vurgu)" : "1px solid var(--cizgi)",
+                  background: aktif ? "var(--vurgu)" : "var(--bg)",
+                  color: aktif ? "#111" : "var(--fg)",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
+                {kat}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* KONU LİSTESİ */}
@@ -507,192 +635,295 @@ export default function ForumSayfasi() {
           >
             <div style={{ fontSize: 36, marginBottom: 10 }}>💬</div>
             <strong style={{ fontSize: 18, display: "block", marginBottom: 6 }}>
-              Henüz bu kategoride açılmış bir konu yok
+              Aradığın kriterde konu bulunamadı
             </strong>
             <p style={{ margin: 0, fontSize: 14, opacity: 0.75 }}>
-              Sağ üstteki <strong>"✍️ Yeni Konu Aç"</strong> butonuna tıklayarak ilk tartışmayı sen başlatabilirsin!
+              Sağ üstteki <strong>&quot;✍️ Yeni Konu Aç&quot;</strong> butonuna tıklayarak ilk tartışmayı sen başlatabilirsin!
             </p>
           </div>
         ) : (
           filtrelenmis.map((k) => {
             const acik = acikKonuId === k.id;
+            const oyVerildi = oyVerilenler.includes(k.id);
+            const sahibiMi =
+              !!kullaniciEmail &&
+              !!k.yazar_email &&
+              kullaniciEmail.toLowerCase() === k.yazar_email.toLowerCase();
+            const kapatabilirMi = adminMi || sahibiMi;
+
             return (
               <article
                 key={k.id}
                 style={{
                   padding: 22,
                   background: "var(--kart)",
-                  border: "1px solid var(--cizgi)",
+                  border: k.kapali ? "1px solid #22c55e" : "1px solid var(--cizgi)",
                   borderRadius: 16,
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div
-                    onClick={() => setAcikKonuId(acik ? null : k.id)}
-                    style={{ flex: 1, cursor: "pointer" }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
-                      <span
-                        style={{
-                          fontSize: 12,
-                          padding: "3px 10px",
-                          borderRadius: 8,
-                          background: "var(--bg)",
-                          border: "1px solid var(--cizgi)",
-                          color: "var(--vurgu)",
-                          fontWeight: 800,
-                        }}
-                      >
-                        {k.kategori}
-                      </span>
-                      <span style={{ fontSize: 13, opacity: 0.7 }}>
-                        👤 <strong>{k.yazar}</strong> · {zamanFormatla(k.created_at)}
-                      </span>
-                    </div>
-                    <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>{k.baslik}</h2>
-                  </div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <button
-                      type="button"
-                      onClick={() => setAcikKonuId(acik ? null : k.id)}
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 700,
-                        padding: "6px 12px",
-                        borderRadius: 8,
-                        background: "var(--bg)",
-                        border: "1px solid var(--cizgi)",
-                        color: "var(--fg)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      💬 {k.yorumlar.length} Yanıt {acik ? "▲" : "▼"}
-                    </button>
-
-                    {adminMi && (
-                      <button
-                        type="button"
-                        onClick={() => konuSil(k.id)}
-                        title="Admin: Konuyu Sil"
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 800,
-                          padding: "6px 12px",
-                          borderRadius: 8,
-                          background: "rgba(239, 68, 68, 0.16)",
-                          border: "1px solid #ef4444",
-                          color: "#ef6b5f",
-                          cursor: "pointer",
-                        }}
-                      >
-                        🗑️ Konuyu Sil
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <p style={{ margin: "12px 0 0", fontSize: 15, opacity: 0.88, lineHeight: 1.55 }}>{k.icerik}</p>
-
-                {/* YORUMLAR & YANIT YAZMA ALANI */}
-                {acik && (
-                  <div
+                <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                  {/* SOL TARAF: OYLAMA (UPVOTE) BUTONU */}
+                  <button
+                    type="button"
+                    onClick={() => oyVer(k)}
+                    disabled={oyVerildi}
+                    title={oyVerildi ? "Bu konuya oy verdin" : "Trende çıkarmak için oy ver"}
                     style={{
-                      marginTop: 18,
-                      paddingTop: 16,
-                      borderTop: "1px solid var(--cizgi)",
+                      minWidth: 58,
+                      padding: "10px 8px",
+                      borderRadius: 12,
+                      border: "1px solid " + (oyVerildi ? "var(--vurgu)" : "var(--cizgi)"),
+                      background: oyVerildi ? "rgba(245, 197, 66, 0.18)" : "var(--bg)",
+                      color: oyVerildi ? "var(--vurgu)" : "var(--fg)",
                       display: "flex",
                       flexDirection: "column",
-                      gap: 12,
+                      alignItems: "center",
+                      gap: 2,
+                      cursor: oyVerildi ? "default" : "pointer",
+                      flexShrink: 0,
                     }}
                   >
-                    {k.yorumlar.map((y) => (
+                    <span style={{ fontSize: 14, fontWeight: 900 }}>▲</span>
+                    <span style={{ fontSize: 16, fontWeight: 900 }}>{k.oylar ?? 0}</span>
+                    <span style={{ fontSize: 10, opacity: 0.75 }}>OY</span>
+                  </button>
+
+                  {/* SAĞ TARAF: KONU BAŞLIĞI, DURUM ETİKETLERİ VE YÖNETİM */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: 12,
+                        flexWrap: "wrap",
+                      }}
+                    >
                       <div
-                        key={y.id}
-                        style={{
-                          padding: "12px 16px",
-                          borderRadius: 12,
-                          background: "var(--bg)",
-                          border: "1px solid var(--cizgi)",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          gap: 12,
-                        }}
+                        onClick={() => setAcikKonuId(acik ? null : k.id)}
+                        style={{ flex: 1, cursor: "pointer" }}
                       >
-                        <div>
-                          <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>
-                            <strong>{y.yazar}</strong> · {zamanFormatla(y.created_at)}
-                          </div>
-                          <div style={{ fontSize: 14, lineHeight: 1.45 }}>{y.icerik}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                          {k.kapali && (
+                            <span
+                              style={{
+                                fontSize: 12,
+                                padding: "3px 10px",
+                                borderRadius: 8,
+                                background: "rgba(34, 197, 94, 0.18)",
+                                border: "1px solid #22c55e",
+                                color: "#22c55e",
+                                fontWeight: 800,
+                              }}
+                            >
+                              ✅ Çözüldü & Kilitli
+                            </span>
+                          )}
+                          {(k.oylar ?? 0) >= 5 && (
+                            <span
+                              style={{
+                                fontSize: 12,
+                                padding: "3px 10px",
+                                borderRadius: 8,
+                                background: "rgba(245, 158, 11, 0.18)",
+                                border: "1px solid #f59e0b",
+                                color: "#f59e0b",
+                                fontWeight: 800,
+                              }}
+                            >
+                              🔥 Trend
+                            </span>
+                          )}
+                          <span
+                            style={{
+                              fontSize: 12,
+                              padding: "3px 10px",
+                              borderRadius: 8,
+                              background: "var(--bg)",
+                              border: "1px solid var(--cizgi)",
+                              color: "var(--vurgu)",
+                              fontWeight: 800,
+                            }}
+                          >
+                            {k.kategori}
+                          </span>
+                          <span style={{ fontSize: 13, opacity: 0.7 }}>
+                            👤 <strong>{k.yazar}</strong> · {zamanFormatla(k.created_at)}
+                          </span>
                         </div>
+                        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>{k.baslik}</h2>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          onClick={() => setAcikKonuId(acik ? null : k.id)}
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 700,
+                            padding: "6px 12px",
+                            borderRadius: 8,
+                            background: "var(--bg)",
+                            border: "1px solid var(--cizgi)",
+                            color: "var(--fg)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          💬 {k.yorumlar.length} Yanıt {acik ? "▲" : "▼"}
+                        </button>
+
+                        {kapatabilirMi && (
+                          <button
+                            type="button"
+                            onClick={() => durumDegistir(k)}
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 800,
+                              padding: "6px 11px",
+                              borderRadius: 8,
+                              background: k.kapali ? "var(--bg)" : "rgba(34, 197, 94, 0.15)",
+                              border: "1px solid #22c55e",
+                              color: "#22c55e",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {k.kapali ? "🔓 Tekrar Aç" : "✅ Çözüldü Olarak Kapat"}
+                          </button>
+                        )}
 
                         {adminMi && (
                           <button
                             type="button"
-                            onClick={() => yorumSil(k.id, y.id)}
-                            title="Admin: Yorumu Sil"
+                            onClick={() => konuSil(k.id)}
+                            title="Admin: Konuyu Sil"
                             style={{
-                              padding: "4px 9px",
-                              borderRadius: 6,
-                              border: "1px solid #ef4444",
-                              background: "transparent",
-                              color: "#ef6b5f",
                               fontSize: 12,
-                              fontWeight: 700,
+                              fontWeight: 800,
+                              padding: "6px 11px",
+                              borderRadius: 8,
+                              background: "rgba(239, 68, 68, 0.16)",
+                              border: "1px solid #ef4444",
+                              color: "#ef6b5f",
                               cursor: "pointer",
-                              flexShrink: 0,
                             }}
                           >
                             🗑️ Sil
                           </button>
                         )}
                       </div>
-                    ))}
+                    </div>
 
-                    <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                      <input
-                        value={yorumMetni}
-                        onChange={(e) => setYorumMetni(e.target.value)}
-                        placeholder="Bu konuya yanıt yaz..."
+                    <p style={{ margin: "12px 0 0", fontSize: 15, opacity: 0.88, lineHeight: 1.55 }}>{k.icerik}</p>
+
+                    {/* YORUMLAR & YANIT YAZMA ALANI */}
+                    {acik && (
+                      <div
                         style={{
-                          flex: 1,
-                          padding: "11px 14px",
-                          borderRadius: 10,
-                          border: "1px solid var(--cizgi)",
-                          background: "var(--bg)",
-                          color: "var(--fg)",
-                          fontSize: 14,
-                        }}
-                      />
-                      <button
-                        type="button"
-                        disabled={yorumGonderiliyor}
-                        onClick={() => yorumEkle(k.id)}
-                        style={{
-                          padding: "11px 20px",
-                          borderRadius: 10,
-                          border: 0,
-                          background: "var(--vurgu)",
-                          color: "#111",
-                          fontWeight: 800,
-                          fontSize: 14,
-                          cursor: "pointer",
+                          marginTop: 18,
+                          paddingTop: 16,
+                          borderTop: "1px solid var(--cizgi)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 12,
                         }}
                       >
-                        {yorumGonderiliyor ? "..." : "Gönder"}
-                      </button>
-                    </div>
+                        {k.yorumlar.map((y) => (
+                          <div
+                            key={y.id}
+                            style={{
+                              padding: "12px 16px",
+                              borderRadius: 12,
+                              background: "var(--bg)",
+                              border: "1px solid var(--cizgi)",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              gap: 12,
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>
+                                <strong>{y.yazar}</strong> · {zamanFormatla(y.created_at)}
+                              </div>
+                              <div style={{ fontSize: 14, lineHeight: 1.45 }}>{y.icerik}</div>
+                            </div>
+
+                            {adminMi && (
+                              <button
+                                type="button"
+                                onClick={() => yorumSil(k.id, y.id)}
+                                title="Admin: Yorumu Sil"
+                                style={{
+                                  padding: "4px 9px",
+                                  borderRadius: 6,
+                                  border: "1px solid #ef4444",
+                                  background: "transparent",
+                                  color: "#ef6b5f",
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                🗑️ Sil
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                        {k.kapali ? (
+                          <div
+                            style={{
+                              padding: "12px 16px",
+                              borderRadius: 10,
+                              background: "rgba(34, 197, 94, 0.12)",
+                              border: "1px solid #22c55e",
+                              color: "#22c55e",
+                              fontSize: 14,
+                              fontWeight: 700,
+                            }}
+                          >
+                            🔒 Bu konu çözüme ulaştığı için kapatılmıştır. Geçmiş cevapları inceleyebilir ancak yeni yorum yazamazsınız.
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                            <input
+                              value={yorumMetni}
+                              onChange={(e) => setYorumMetni(e.target.value)}
+                              placeholder="Bu konuya yanıt yaz..."
+                              style={{
+                                flex: 1,
+                                padding: "11px 14px",
+                                borderRadius: 10,
+                                border: "1px solid var(--cizgi)",
+                                background: "var(--bg)",
+                                color: "var(--fg)",
+                                fontSize: 14,
+                              }}
+                            />
+                            <button
+                              type="button"
+                              disabled={yorumGonderiliyor}
+                              onClick={() => yorumEkle(k)}
+                              style={{
+                                padding: "11px 20px",
+                                borderRadius: 10,
+                                border: 0,
+                                background: "var(--vurgu)",
+                                color: "#111",
+                                fontWeight: 800,
+                                fontSize: 14,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {yorumGonderiliyor ? "..." : "Gönder"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </article>
             );
           })
