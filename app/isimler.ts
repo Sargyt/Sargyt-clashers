@@ -22,6 +22,19 @@ const SOZLUK: Record<string, string> = {
   "Valkyrie": "Valkür",
   "Hog Rider": "Domuz Binici",
   "Miner": "Madenci",
+  "Minion": "Minyon",
+  "Bowler": "Atıcı",
+  "Baby Dragon": "Bebek Ejderha",
+  "Yeti": "Yeti",
+  "Ice Golem": "Buz Golem",
+  "Electro Dragon": "Elektro Ejderha",
+  "Dragon Rider": "Ejderha Binici",
+  "Headhunter": "Kelle Avcısı",
+  "Electro Titan": "Elektro Titan",
+  "Apprentice Warden": "Çırak Koruyucu",
+  "Druid": "Druid",
+  "Root Rider": "Orman Binici",
+  "Ruin Witch": "Yıkım Cadısı",
 };
 
 export function tr(isim: string): string {
