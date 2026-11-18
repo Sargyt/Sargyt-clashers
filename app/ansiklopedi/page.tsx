@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { tr } from "../isimler";
 
 const LISTE = [
   { isim: "Barbarian King", tur: "Kahraman", not: "Yer tankı, Iron Fist yeteneği" },
@@ -49,7 +50,7 @@ export default function Ansiklopedi() {
   const sonuc = LISTE.filter(
     (x) =>
       (tur === "Tümü" || x.tur === tur) &&
-      (x.isim + " " + x.not).toLowerCase().includes(ara.trim().toLowerCase())
+      (x.isim + " " + tr(x.isim) + " " + x.not).toLowerCase().includes(ara.trim().toLowerCase())
   );
 
   return (
@@ -105,7 +106,7 @@ export default function Ansiklopedi() {
               borderRadius: 12,
             }}
           >
-            <strong>{x.isim}</strong>
+            <strong>{tr(x.isim)}</strong>
             <div style={{ fontSize: 12, opacity: 0.7, margin: "2px 0 6px" }}>{x.tur}</div>
             <div style={{ fontSize: 14 }}>{x.not}</div>
           </div>
