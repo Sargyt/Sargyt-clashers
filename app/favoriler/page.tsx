@@ -69,9 +69,12 @@ export default function Favoriler() {
             borderRadius: 12,
           }}
         >
-          <span>
-            <strong>{f.isim}</strong> · {f.kod}
-          </span>
+          <Link
+            href={"/?kod=" + f.kod.replace(/^#/, "")}
+            style={{ color: "var(--vurgu)", textDecoration: "none", fontWeight: 700 }}
+          >
+            {f.isim} · {f.kod} ↗
+          </Link>
           <button
             onClick={() => sil(f.kod)}
             style={{

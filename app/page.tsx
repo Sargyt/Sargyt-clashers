@@ -1,5 +1,5 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { tr } from "./isimler";
 import { supabase } from "./supabase";
 import { gercekAzami } from "./thSinirlari";
@@ -167,6 +167,45 @@ export default function Home() {
     }
     setYukleniyor(false);
   }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlKod = params.get("kod");
+    if (urlKod) {
+      const temiz = urlKod.trim().toUpperCase().replace(/^#/, "").replace(/O/g, "0");
+      setKod("#" + temiz);
+      if (KOD_KURALI.test(temiz)) {
+        setHata("");
+        setYukleniyor(true);
+        fetch("/api/oyuncu?kod=" + temiz)
+          .then(async (yanit) => {
+            const veri = await yanit.json();
+            if (!yanit.ok) {
+              setHata(veri.hata ?? "Bir sorun oluştu");
+            } else {
+              setOyuncu({
+                ...veri,
+                kahramanlar: veri.kahramanlar.map((k: Parca) => ({
+                  ...k,
+                  azami: gercekAzami(veri.thSeviyesi, k.isim, k.azami),
+                })),
+                birlikler: veri.birlikler.map((b: Parca) => ({
+                  ...b,
+                  azami: gercekAzami(veri.thSeviyesi, b.isim, b.azami),
+                })),
+                buyuler: veri.buyuler.map((s: Parca) => ({
+                  ...s,
+                  azami: gercekAzami(veri.thSeviyesi, s.isim, s.azami),
+                })),
+              });
+              setAktifSekme("kahramanlar");
+            }
+          })
+          .catch(() => setHata("Bağlantı hatası, tekrar dene."))
+          .finally(() => setYukleniyor(false));
+      }
+    }
+  }, []);
 
   const normal = oyuncu ? oyuncu.birlikler.filter((p) => !superMi(p) && !PETLER.includes(p.isim)) : [];
   const petler = oyuncu ? oyuncu.birlikler.filter((p) => PETLER.includes(p.isim)) : [];

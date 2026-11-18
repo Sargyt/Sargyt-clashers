@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
@@ -280,9 +281,15 @@ Klan etiketini gir, savaş istatistiklerini, Belediye Binası dağılımını ve
             <tbody>
               {siraliUyeler.map((u, idx) => (
                 <tr key={u.tag} style={{ borderBottom: "1px solid var(--cizgi)" }}>
-                  <td style={{ padding: "10px 8px", opacity: 0.7 }}>{idx + 1}</td>
+                 <td style={{ padding: "10px 8px", opacity: 0.7 }}>{idx + 1}</td>
                   <td style={{ padding: "10px 8px" }}>
-                    <strong>{u.name}</strong>
+                    <Link
+                      href={"/?kod=" + u.tag.replace(/^#/, "")}
+                      style={{ color: "var(--vurgu)", textDecoration: "none", fontWeight: 700 }}
+                      title="Bu oyuncunun köyünü analiz et"
+                    >
+                      {u.name} ↗
+                    </Link>
                     <div style={{ fontSize: 11, opacity: 0.65 }}>{u.tag}</div>
                   </td>
                   <td style={{ padding: "10px 8px" }}>
