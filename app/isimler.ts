@@ -6,16 +6,26 @@ const SOZLUK: Record<string, string> = {
   "Royal Champion": "Kraliyet Şampiyonu",
   "Minion Prince": "Minyon Prens",
   "Dragon Duke": "Ejder Dükü",
-  "Barbarian": "",
-  "Archer": "",
-  "Giant": "",
-  "Healer": "",
-  "Golem": "",
-  "Hog Rider": "",
-  "P.E.K.K.A": "",
+  "Barbarian": "Barbar",
+  "Archer": "Okçu",
+  "Giant": "Dev",
+  "Goblin": "Goblin",
+  "Wall Breaker": "Duvar Yıkıcı",
+  "Balloon": "Balon",
+  "Wizard": "Büyücü",
+  "Healer": "Şifacı",
+  "Dragon": "Ejderha",
+  "P.E.K.K.A": "P.E.K.K.A",
+  "Golem": "Golem",
+  "Witch": "Cadı",
+  "Lava Hound": "Lav Tazısı",
+  "Valkyrie": "Valkür",
+  "Hog Rider": "Domuz Binici",
+  "Miner": "Madenci",
 };
 
 export function tr(isim: string): string {
   const t = SOZLUK[isim];
-  return t ? t + " (" + isim + ")" : isim;
+  if (!t) return isim;
+  return t === isim ? isim : t + " (" + isim + ")";
 }
