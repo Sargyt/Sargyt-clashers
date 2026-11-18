@@ -1,6 +1,6 @@
 "use client";
 import { useState, type FormEvent } from "react";
-
+import { tr } from "./isimler";
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
 type Parca = { isim: string; seviye: number; azami: number };
@@ -36,7 +36,7 @@ function Satir({ p }: { p: Parca }) {
   return (
     <div>
       <div style={{ fontSize: 14 }}>
-        {p.isim}: {p.seviye}/{p.azami}
+        {tr(p.isim)}: {p.seviye}/{p.azami}
       </div>
       <div style={{ height: 8, background: "var(--cizgi)", borderRadius: 6, overflow: "hidden" }}>
         <div
@@ -80,7 +80,7 @@ function Eksikler({ baslik, liste }: { baslik: string; liste: Parca[] }) {
       <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14 }}>
         {eksik.map((p) => (
           <li key={p.isim} style={{ marginBottom: 4 }}>
-            {p.isim}: {p.azami - p.seviye} seviye kaldı ({p.seviye}/{p.azami})
+            {tr(p.isim)}: {p.azami - p.seviye} seviye kaldı ({p.seviye}/{p.azami})
           </li>
         ))}
       </ol>
