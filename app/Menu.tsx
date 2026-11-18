@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const TEMALAR = [
@@ -8,8 +9,17 @@ const TEMALAR = [
   { id: "mor-siyah", ad: "Mor · Siyah" },
 ];
 
+const LINKLER = [
+  { href: "/", ad: "Ana Sayfa" },
+  { href: "/ordular", ad: "Ordular" },
+  { href: "/ansiklopedi", ad: "Ansiklopedi" },
+  { href: "/favoriler", ad: "Favoriler" },
+  { href: "/giris", ad: "Giriş" },
+];
+
 export default function Menu() {
   const [tema, setTema] = useState("altin-koyu");
+  const yol = usePathname();
 
   useEffect(() => {
     try {
@@ -29,8 +39,6 @@ export default function Menu() {
     } catch {}
   }
 
-  const stil = { color: "inherit", textDecoration: "none", padding: "6px 12px" };
-
   return (
     <nav
       style={{
@@ -41,25 +49,41 @@ export default function Menu() {
         borderBottom: "1px solid var(--cizgi)",
         background: "var(--kart)",
         flexWrap: "wrap",
-                position: "sticky",
+        position: "sticky",
         top: 0,
         zIndex: 10,
       }}
     >
-      <strong style={{ marginRight: 16 }}>⚔️ Sargyt Clashers</strong>
-      <Link href="/" style={stil}>Ana Sayfa</Link>
-      <Link href="/ordular" style={stil}>Ordular</Link>
-      <Link href="/ansiklopedi" style={stil}>Ansiklopedi</Link>
-      <Link href="/favoriler" style={stil}>Favoriler</Link>
-      <Link href="/giris" style={stil}>Giriş</Link>
+      <strong style={{ marginRight: 12 }}>⚔️ Sargyt Clashers</strong>
+      {LINKLER.map((l) => {
+        const aktif = yol === l.href;
+        return (
+          <Link
+            key={l.href}
+            href={l.href}
+            style={{
+              padding: "8px 14px",
+              borderRadius: 10,
+              border: "1px solid " + (aktif ? "var(--vurgu)" : "var(--cizgi)"),
+              background: aktif ? "var(--vurgu)" : "var(--bg)",
+              color: aktif ? "#111" : "var(--fg)",
+              fontWeight: 600,
+              fontSize: 14,
+              textDecoration: "none",
+            }}
+          >
+            {l.ad}
+          </Link>
+        );
+      })}
       <select
         value={tema}
         onChange={(e) => sec(e.target.value)}
         aria-label="Tema"
         style={{
           marginLeft: "auto",
-          padding: "6px 10px",
-          borderRadius: 8,
+          padding: "8px 10px",
+          borderRadius: 10,
           border: "1px solid var(--cizgi)",
           background: "var(--bg)",
           color: "var(--fg)",

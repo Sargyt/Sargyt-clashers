@@ -70,3 +70,10 @@ h1 {
     padding-right: 14px !important;
   }
 }
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--vurgu) 16%, transparent), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
