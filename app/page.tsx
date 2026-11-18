@@ -1,6 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { tr } from "./isimler";
+import { supabase } from "./supabase";
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
 type Parca = { isim: string; seviye: number; azami: number };
@@ -95,7 +96,19 @@ export default function Home() {
   const [oyuncu, setOyuncu] = useState<Oyuncu | null>(null);
   const [favoriMesaj, setFavoriMesaj] = useState("");
 
-function favoriyeEkle(o: Oyuncu) {
+async function favoriyeEkle(o: Oyuncu) {
+  const { data } = await supabase.auth.getSession();
+  if (data.session) {
+    const { error } = await supabase
+      .from("favoriler")
+      .insert({ kod: o.kod, isim: o.isim.slice(0, 40) });
+    if (error) {
+      setFavoriMesaj(error.code === "23505" ? "Zaten favorilerde." : "Kaydedilemedi.");
+    } else {
+      setFavoriMesaj("Hesabına eklendi.");
+    }
+    return;
+  }
   try {
     const eski = JSON.parse(localStorage.getItem("favoriler") || "[]");
     const liste: { kod: string; isim: string }[] = Array.isArray(eski) ? eski : [];
@@ -105,7 +118,7 @@ function favoriyeEkle(o: Oyuncu) {
     }
     liste.push({ kod: o.kod, isim: o.isim });
     localStorage.setItem("favoriler", JSON.stringify(liste));
-    setFavoriMesaj("Favorilere eklendi.");
+    setFavoriMesaj("Bu tarayıcıya eklendi. Hesabına kaydetmek için giriş yap.");
   } catch {
     setFavoriMesaj("Kaydedilemedi.");
   }

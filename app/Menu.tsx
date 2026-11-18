@@ -51,6 +51,7 @@ export default function Menu() {
       <Link href="/ordular" style={stil}>Ordular</Link>
       <Link href="/ansiklopedi" style={stil}>Ansiklopedi</Link>
       <Link href="/favoriler" style={stil}>Favoriler</Link>
+      <Link href="/giris" style={stil}>Giriş</Link>
       <select
         value={tema}
         onChange={(e) => sec(e.target.value)}

@@ -1,31 +1,58 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { supabase } from "../supabase";
 
 type Favori = { kod: string; isim: string };
 
 export default function Favoriler() {
   const [liste, setListe] = useState<Favori[]>([]);
+  const [girisli, setGirisli] = useState(false);
 
   useEffect(() => {
-    try {
-      const veri = JSON.parse(localStorage.getItem("favoriler") || "[]");
-      if (Array.isArray(veri)) setListe(veri);
-    } catch {}
+    async function yukle() {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        setGirisli(true);
+        const { data: satirlar } = await supabase
+          .from("favoriler")
+          .select("kod, isim")
+          .order("created_at", { ascending: false });
+        setListe(satirlar ?? []);
+      } else {
+        try {
+          const veri = JSON.parse(localStorage.getItem("favoriler") || "[]");
+          if (Array.isArray(veri)) setListe(veri);
+        } catch {}
+      }
+    }
+    yukle();
   }, []);
 
-  function sil(kod: string) {
+  async function sil(kod: string) {
     const yeni = liste.filter((f) => f.kod !== kod);
     setListe(yeni);
-    try {
-      localStorage.setItem("favoriler", JSON.stringify(yeni));
-    } catch {}
+    if (girisli) {
+      await supabase.from("favoriler").delete().eq("kod", kod);
+    } else {
+      try {
+        localStorage.setItem("favoriler", JSON.stringify(yeni));
+      } catch {}
+    }
   }
 
   return (
     <main style={{ padding: "40px 20px", maxWidth: 800, margin: "0 auto" }}>
       <h1>⭐ Favoriler</h1>
       <p style={{ opacity: 0.75 }}>
-        Favoriler şimdilik bu tarayıcıda saklanır. E-posta ile üyelik gelince cihazlar arasında senkron olacak.
+        {girisli ? (
+          "Favorilerin hesabında saklanıyor."
+        ) : (
+          <>
+            Favoriler şimdilik bu tarayıcıda saklanıyor. Hesabına kaydetmek için{" "}
+            <Link href="/giris">giriş yap</Link>.
+          </>
+        )}
       </p>
       {liste.length === 0 && <p>Henüz favori yok.</p>}
       {liste.map((f) => (
