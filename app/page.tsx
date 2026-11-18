@@ -44,7 +44,7 @@ export default function Home() {
 
   return (
     <main style={{ padding: 40, fontFamily: "sans-serif", maxWidth: 600 }}>
-      <h1>⚔️ Sargyt Clashers</h1>
+      <h1>Köyünü analiz et</h1>
       <p>Clash of Clans köy analizi ve rehber sitesi.</p>
       <form onSubmit={ara} style={{ display: "flex", gap: 8 }}>
         <input
