@@ -35,6 +35,15 @@ const SOZLUK: Record<string, string> = {
   "Druid": "Druid",
   "Root Rider": "Orman Binici",
   "Ruin Witch": "Yıkım Cadısı",
+  "Wall Wrecker": "Tokmak",
+  "Battle Blimp": "Zeplin",
+  "Stone Slammer": "Kaya Balonu",
+  "Siege Barracks": "Uçan Kışla",
+  "Log Launcher": "Tomruk Fırlatıcı",
+  "Flame Flinger": "Alev Atıcı",
+  "Battle Drill": "Savaş Köstebeği",
+  "Troop Launcher": "Birlik Atıcı",
+  "Sky Wagon": "Uçan Taşıyıcı",
 };
 
 export function tr(isim: string): string {
