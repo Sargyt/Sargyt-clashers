@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EPOSTA } from "./iletisim";
 
 export default function Altbilgi() {
   return (
@@ -13,7 +14,8 @@ export default function Altbilgi() {
       }}
     >
       <div style={{ marginBottom: 6 }}>
-        <Link href="/hakkinda">Hakkında</Link> · <Link href="/gizlilik">Gizlilik</Link>
+        <Link href="/hakkinda">Hakkında</Link> · <Link href="/gizlilik">Gizlilik</Link> ·{" "}
+<a href={"mailto:" + EPOSTA}>İletişim</a>
       </div>
       Sargyt Clashers, Supercell tarafından desteklenmemekte veya onaylanmamaktadır.
     </footer>

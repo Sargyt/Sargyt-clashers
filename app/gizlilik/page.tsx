@@ -1,3 +1,4 @@
+import { EPOSTA } from "../iletisim";
 export default function Gizlilik() {
   return (
     <main style={{ padding: "40px 20px", maxWidth: 800, margin: "0 auto", lineHeight: 1.6 }}>
@@ -28,7 +29,9 @@ export default function Gizlilik() {
       </p>
 
       <h2>Bize ulaş</h2>
-      <p>Bir sorun, hata ya da talep için: [iletişim e-postası eklenecek]</p>
+      <p>
+  Bir sorun, hata ya da talep için: <a href={"mailto:" + EPOSTA}>{EPOSTA}</a>
+</p>
 
       <p style={{ opacity: 0.75, fontSize: 14, marginTop: 24 }}>
         Bu site Supercell tarafından desteklenmemekte veya onaylanmamaktadır.

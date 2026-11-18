@@ -1,3 +1,4 @@
+import { EPOSTA } from "../iletisim";
 export default function Hakkinda() {
   return (
     <main style={{ padding: "40px 20px", maxWidth: 800, margin: "0 auto", lineHeight: 1.6 }}>
@@ -10,6 +11,9 @@ export default function Hakkinda() {
       <p>
         İçerikler Türkçe oyun diline göre hazırlanmaktadır. &quot;Doğrulanmadı&quot; etiketli içerikler
         henüz teyit edilmemiştir. Bir hata görürsen bildirebilirsin.
+              <p>
+        Hata bildirmek veya öneride bulunmak için: <a href={"mailto:" + EPOSTA}>{EPOSTA}</a>
+      </p>
       </p>
       <p style={{ opacity: 0.75, fontSize: 14 }}>
         Bu site Supercell tarafından desteklenmemekte veya onaylanmamaktadır. Clash of Clans,
