@@ -1,149 +1,206 @@
 "use client";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../supabase";
 
-const EPOSTA_KURALI = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export default function Giris() {
-  const [eposta, setEposta] = useState("");
+export default function GirisSayfasi() {
+  const router = useRouter();
+  const [kayitModu, setKayitModu] = useState(false);
+  const [email, setEmail] = useState("");
   const [sifre, setSifre] = useState("");
-  const [mod, setMod] = useState<"giris" | "kayit">("giris");
-  const [mesaj, setMesaj] = useState("");
   const [yukleniyor, setYukleniyor] = useState(false);
-  const [kullanici, setKullanici] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setKullanici(data.session?.user.email ?? null);
-    });
-    const { data } = supabase.auth.onAuthStateChange((_olay, session) => {
-      setKullanici(session?.user.email ?? null);
-    });
-    return () => data.subscription.unsubscribe();
-  }, []);
+  const [mesaj, setMesaj] = useState("");
+  const [hata, setHata] = useState("");
 
   async function gonder(e: FormEvent) {
     e.preventDefault();
+    setHata("");
     setMesaj("");
-    const adres = eposta.trim().toLowerCase();
-    if (!EPOSTA_KURALI.test(adres)) {
-      setMesaj("Geçerli bir e-posta adresi yaz.");
-      return;
-    }
-    if (sifre.length < 8) {
-      setMesaj("Şifre en az 8 karakter olmalı.");
-      return;
-    }
     setYukleniyor(true);
-    if (mod === "kayit") {
+
+    if (kayitModu) {
       const { error } = await supabase.auth.signUp({
-        email: adres,
+        email: email.trim(),
         password: sifre,
-        options: { emailRedirectTo: window.location.origin + "/giris" },
       });
-      setMesaj(
-        error
-          ? "Kayıt yapılamadı, biraz sonra tekrar dene."
-          : "Kayıt isteği alındı. E-postana gelen doğrulama linkine tıkla (spam klasörüne de bak)."
-      );
+      if (error) {
+        setHata(error.message);
+      } else {
+        setMesaj("Kayıt başarılı! E-posta adresine gelen doğrulama bağlantısına tıklayabilirsin.");
+      }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email: adres, password: sifre });
-      setMesaj(error ? "E-posta veya şifre hatalı ya da e-posta henüz doğrulanmadı." : "");
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: sifre,
+      });
+      if (error) {
+        setHata("E-posta veya şifre hatalı.");
+      } else {
+        router.push("/");
+        router.refresh();
+      }
     }
-    setSifre("");
     setYukleniyor(false);
   }
 
-  async function cikis() {
-    await supabase.auth.signOut();
-  }
-
-  const kutu = {
-    padding: 12,
-    borderRadius: 10,
-    border: "1px solid var(--cizgi)",
-    background: "var(--kart)",
-    color: "var(--fg)",
-    width: "100%",
-  } as const;
-
-  if (kullanici) {
-    return (
-      <main style={{ padding: "40px 20px", maxWidth: 420, margin: "0 auto" }}>
-        <h1>Hesabın</h1>
-        <p>
-          Giriş yapıldı: <strong>{kullanici}</strong>
-        </p>
-        <button
-          onClick={cikis}
-          style={{
-            padding: "12px 20px",
-            borderRadius: 10,
-            border: "1px solid var(--cizgi)",
-            background: "var(--kart)",
-            color: "var(--fg)",
-            cursor: "pointer",
-          }}
-        >
-          Çıkış yap
-        </button>
-      </main>
-    );
-  }
-
   return (
-    <main style={{ padding: "40px 20px", maxWidth: 420, margin: "0 auto" }}>
-      <h1>{mod === "giris" ? "Giriş yap" : "Kayıt ol"}</h1>
-      <form onSubmit={gonder} style={{ display: "grid", gap: 10 }}>
-        <input
-          type="email"
-          value={eposta}
-          onChange={(e) => setEposta(e.target.value)}
-          placeholder="E-posta"
-          autoComplete="email"
-          maxLength={100}
-          style={kutu}
-        />
-        <input
-          type="password"
-          value={sifre}
-          onChange={(e) => setSifre(e.target.value)}
-          placeholder="Şifre (en az 8 karakter)"
-          autoComplete={mod === "giris" ? "current-password" : "new-password"}
-          maxLength={72}
-          style={kutu}
-        />
-        <button
-          disabled={yukleniyor}
+    <main
+      style={{
+        minHeight: "calc(100vh - 140px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 20px",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 440,
+          padding: 32,
+          background: "var(--kart)",
+          border: "1px solid var(--cizgi)",
+          borderRadius: 18,
+          display: "flex",
+          flexDirection: "column",
+          gap: 22,
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>
+            {kayitModu ? "Yeni Hesap Oluştur" : "Hoş Geldin"}
+          </div>
+          <p style={{ margin: 0, fontSize: 14, opacity: 0.75 }}>
+            {kayitModu
+              ? "Favori köylerini ve ayarlarını tüm cihazlarında sakla."
+              : "Hesabına erişmek için bilgilerini gir."}
+          </p>
+        </div>
+
+        <form onSubmit={gonder} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 14, fontWeight: 600 }}>
+            E-posta Adresi
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ornek@mail.com"
+              style={{
+                padding: "13px 14px",
+                borderRadius: 10,
+                border: "1px solid var(--cizgi)",
+                background: "var(--bg)",
+                color: "var(--fg)",
+                fontSize: 15,
+              }}
+            />
+          </label>
+
+          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 14, fontWeight: 600 }}>
+            Şifre
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={sifre}
+              onChange={(e) => setSifre(e.target.value)}
+              placeholder="En az 6 karakter"
+              style={{
+                padding: "13px 14px",
+                borderRadius: 10,
+                border: "1px solid var(--cizgi)",
+                background: "var(--bg)",
+                color: "var(--fg)",
+                fontSize: 15,
+              }}
+            />
+          </label>
+
+          {hata && (
+            <div
+              style={{
+                padding: "10px 12px",
+                borderRadius: 8,
+                background: "rgba(239, 107, 95, 0.12)",
+                color: "#ef6b5f",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              {hata}
+            </div>
+          )}
+
+          {mesaj && (
+            <div
+              style={{
+                padding: "10px 12px",
+                borderRadius: 8,
+                background: "rgba(34, 197, 94, 0.12)",
+                color: "#22c55e",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              {mesaj}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={yukleniyor}
+            style={{
+              marginTop: 4,
+              padding: "14px",
+              borderRadius: 12,
+              border: 0,
+              background: "var(--vurgu)",
+              color: "#111",
+              fontSize: 16,
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            {yukleniyor ? "İşleniyor..." : kayitModu ? "Kayıt Ol" : "Giriş Yap"}
+          </button>
+        </form>
+
+        <div
           style={{
-            padding: "12px 20px",
-            borderRadius: 10,
-            border: 0,
-            background: "var(--vurgu)",
-            color: "#111",
-            fontWeight: 700,
-            cursor: "pointer",
+            borderTop: "1px solid var(--cizgi)",
+            paddingTop: 18,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            textAlign: "center",
           }}
         >
-          {yukleniyor ? "Bekleyin..." : mod === "giris" ? "Giriş yap" : "Kayıt ol"}
-        </button>
-      </form>
-      {mesaj && <p style={{ marginTop: 12 }}>{mesaj}</p>}
-      <p style={{ marginTop: 16, fontSize: 14 }}>
-        {mod === "giris" ? "Hesabın yok mu? " : "Zaten hesabın var mı? "}
-        <button
-          onClick={() => {
-            setMod(mod === "giris" ? "kayit" : "giris");
-            setMesaj("");
-          }}
-          style={{ background: "none", border: 0, color: "var(--vurgu)", cursor: "pointer", textDecoration: "underline" }}
-        >
-          {mod === "giris" ? "Kayıt ol" : "Giriş yap"}
-        </button>
-      </p>
-      <p style={{ opacity: 0.7, fontSize: 13 }}>
-        Oyunun giriş bilgilerini (Supercell ID, şifre) burada hiçbir zaman girme.
-      </p>
+          <span style={{ fontSize: 13, opacity: 0.75 }}>
+            {kayitModu ? "Zaten bir hesabın var mı?" : "Henüz hesabın yok mu?"}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setKayitModu(!kayitModu);
+              setHata("");
+              setMesaj("");
+            }}
+            style={{
+              padding: "12px 16px",
+              borderRadius: 12,
+              border: "1px solid var(--vurgu)",
+              background: "transparent",
+              color: "var(--vurgu)",
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            {kayitModu ? "Giriş Ekranına Dön" : "✨ Hemen Ücretsiz Kayıt Ol"}
+          </button>
+        </div>
+      </div>
     </main>
   );
 }

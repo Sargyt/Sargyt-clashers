@@ -13,8 +13,9 @@ const LINKLER = [
   { href: "/", ad: "Ana Sayfa" },
   { href: "/klanlar", ad: "Klanlar" },
   { href: "/ordular", ad: "Ordular" },
-  { href: "/ansiklopedi", ad: "Ansiklopedi" },
+  { href: "/ansiklopedi", ad: "Rehber" },
   { href: "/hesaplayici", ad: "Hesaplayıcı" },
+  { href: "/forum", ad: "Forum" },
   { href: "/favoriler", ad: "Favoriler" },
   { href: "/giris", ad: "Giriş" },
 ];
@@ -45,9 +46,9 @@ export default function Menu() {
     <nav
       style={{
         display: "flex",
-        gap: 8,
+        gap: 12,
         alignItems: "center",
-        padding: "12px 24px",
+        padding: "16px 32px",
         borderBottom: "1px solid var(--cizgi)",
         background: "var(--kart)",
         flexWrap: "wrap",
@@ -56,7 +57,20 @@ export default function Menu() {
         zIndex: 10,
       }}
     >
-      <strong style={{ marginRight: 12 }}>⚔️ Sargyt Clashers</strong>
+      <Link
+        href="/"
+        style={{
+          marginRight: 16,
+          fontSize: 21,
+          fontWeight: 900,
+          color: "var(--fg)",
+          textDecoration: "none",
+          letterSpacing: "-0.3px",
+        }}
+      >
+        ⚔️ Sargyt Clashers
+      </Link>
+
       {LINKLER.map((l) => {
         const aktif = yol === l.href;
         return (
@@ -64,13 +78,13 @@ export default function Menu() {
             key={l.href}
             href={l.href}
             style={{
-              padding: "8px 14px",
-              borderRadius: 10,
+              padding: "11px 18px",
+              borderRadius: 12,
               border: "1px solid " + (aktif ? "var(--vurgu)" : "var(--cizgi)"),
               background: aktif ? "var(--vurgu)" : "var(--bg)",
               color: aktif ? "#111" : "var(--fg)",
-              fontWeight: 600,
-              fontSize: 14,
+              fontWeight: 700,
+              fontSize: 16,
               textDecoration: "none",
             }}
           >
@@ -78,17 +92,21 @@ export default function Menu() {
           </Link>
         );
       })}
+
       <select
         value={tema}
         onChange={(e) => sec(e.target.value)}
         aria-label="Tema"
         style={{
           marginLeft: "auto",
-          padding: "8px 10px",
-          borderRadius: 10,
+          padding: "11px 14px",
+          borderRadius: 12,
           border: "1px solid var(--cizgi)",
           background: "var(--bg)",
           color: "var(--fg)",
+          fontSize: 15,
+          fontWeight: 600,
+          cursor: "pointer",
         }}
       >
         {TEMALAR.map((t) => (

@@ -22,6 +22,36 @@ const DUVAR_MALIYETLERI: Record<number, number> = {
   18: 9000000,
 };
 
+// Resmi Kahraman Ekipmanı Cevher Maliyet Tablosu (Seviye 2'den 27'ye kadar)
+const EKIPMAN_MALIYETLERI: Record<number, { parlak: number; pariltili: number; yildizli: number }> = {
+  2: { parlak: 120, pariltili: 0, yildizli: 0 },
+  3: { parlak: 240, pariltili: 20, yildizli: 0 },
+  4: { parlak: 400, pariltili: 0, yildizli: 0 },
+  5: { parlak: 600, pariltili: 0, yildizli: 0 },
+  6: { parlak: 840, pariltili: 100, yildizli: 0 },
+  7: { parlak: 1120, pariltili: 0, yildizli: 0 },
+  8: { parlak: 1440, pariltili: 0, yildizli: 0 },
+  9: { parlak: 1800, pariltili: 200, yildizli: 10 },
+  10: { parlak: 1900, pariltili: 0, yildizli: 0 },
+  11: { parlak: 2000, pariltili: 0, yildizli: 0 },
+  12: { parlak: 2100, pariltili: 400, yildizli: 20 },
+  13: { parlak: 2200, pariltili: 0, yildizli: 0 },
+  14: { parlak: 2300, pariltili: 0, yildizli: 0 },
+  15: { parlak: 2400, pariltili: 600, yildizli: 30 },
+  16: { parlak: 2500, pariltili: 0, yildizli: 0 },
+  17: { parlak: 2600, pariltili: 0, yildizli: 0 },
+  18: { parlak: 2700, pariltili: 600, yildizli: 50 },
+  19: { parlak: 2800, pariltili: 0, yildizli: 0 },
+  20: { parlak: 2900, pariltili: 0, yildizli: 0 },
+  21: { parlak: 3000, pariltili: 600, yildizli: 100 },
+  22: { parlak: 3100, pariltili: 0, yildizli: 0 },
+  23: { parlak: 3200, pariltili: 0, yildizli: 0 },
+  24: { parlak: 3300, pariltili: 600, yildizli: 120 },
+  25: { parlak: 3400, pariltili: 0, yildizli: 0 },
+  26: { parlak: 3500, pariltili: 0, yildizli: 0 },
+  27: { parlak: 3600, pariltili: 600, yildizli: 150 },
+};
+
 // Clash of Clans gerçek süre -> Taş (Gem) dönüşüm formülü
 function sureyiTasaCevir(toplamSaniye: number): number {
   if (toplamSaniye <= 0) return 0;
@@ -69,6 +99,11 @@ export default function HesaplayiciSayfasi() {
   const [sureIndirimi, setSureIndirimi] = useState(20);
   const [iksirAdedi, setIksirAdedi] = useState(0);
 
+  // 4. Kahraman Ekipmanı Cevher Hesaplayıcı State'leri
+  const [ekipmanTuru, setEkipmanTuru] = useState<"siradan" | "destansi">("destansi");
+  const [ekipmanMevcut, setEkipmanMevcut] = useState(1);
+  const [ekipmanHedef, setEkipmanHedef] = useState(18);
+
   // Duvar Maliyeti Hesaplama
   let birimHamMaliyet = 0;
   for (let s = mevcutSeviye + 1; s <= hedefSeviye; s++) {
@@ -88,11 +123,27 @@ export default function HesaplayiciSayfasi() {
   const iksirKazanciDakika = Math.max(0, iksirAdedi) * 9 * 60;
   const netKalanDakika = Math.max(0, biletSonrasiDakika - iksirKazanciDakika);
 
+  // Cevher Hesaplama (Sıradan ekipmanlarda Yıldızlı Cevher harcanmaz)
+  const maksEkipmanSeviyesi = ekipmanTuru === "siradan" ? 18 : 27;
+  let toplamParlak = 0;
+  let toplamPariltili = 0;
+  let toplamYildizli = 0;
+  for (let s = ekipmanMevcut + 1; s <= ekipmanHedef; s++) {
+    const adim = EKIPMAN_MALIYETLERI[s];
+    if (adim) {
+      toplamParlak += adim.parlak;
+      toplamPariltili += adim.pariltili;
+      if (ekipmanTuru === "destansi") {
+        toplamYildizli += adim.yildizli;
+      }
+    }
+  }
+
   return (
-    <main style={{ padding: "40px 20px", maxWidth: 1040, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 32, margin: "0 0 8px" }}>Köy Hesaplayıcıları</h1>
-      <p style={{ opacity: 0.75, marginTop: 0 }}>
-        Güncel duvar yükseltme maliyetlerini, Altın Bilet kaynak/süre indirimlerini ve taş (gem) tutarını hesapla.
+    <main style={{ padding: "36px 32px", maxWidth: 1360, width: "100%", margin: "0 auto" }}>
+      <h1 style={{ fontSize: 34, fontWeight: 900, margin: "0 0 8px" }}>Köy Hesaplayıcıları</h1>
+      <p style={{ opacity: 0.75, marginTop: 0, fontSize: 16 }}>
+        Duvar maliyetlerini, Altın Bilet süre indirimlerini, taş (gem) tutarını ve Kahraman Ekipmanı cevher maliyetlerini hesapla.
       </p>
 
       <div
@@ -493,6 +544,143 @@ export default function HesaplayiciSayfasi() {
             </div>
             <div style={{ fontSize: 12, opacity: 0.65, marginTop: 4 }}>
               {gun} gün {saat} saat {dakika} dakika için
+            </div>
+          </div>
+        </section>
+
+        {/* 4. KART: KAHRAMAN EKİPMANI CEVHER (ORE) HESAPLAYICI */}
+        <section
+          style={{
+            padding: 22,
+            background: "var(--kart)",
+            border: "1px solid var(--cizgi)",
+            borderRadius: 14,
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          <h2 style={{ margin: 0, fontSize: 19 }}>🛡️ Ekipman Cevher Hesaplayıcı</h2>
+
+          <div>
+            <div style={{ fontSize: 13, marginBottom: 6 }}>Ekipman Nadirliği</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setEkipmanTuru("siradan");
+                  if (ekipmanMevcut >= 18) setEkipmanMevcut(17);
+                  if (ekipmanHedef > 18) setEkipmanHedef(18);
+                }}
+                style={{
+                  padding: "8px 0",
+                  borderRadius: 8,
+                  border: ekipmanTuru === "siradan" ? "1px solid #38bdf8" : "1px solid var(--cizgi)",
+                  background: ekipmanTuru === "siradan" ? "#38bdf8" : "var(--bg)",
+                  color: ekipmanTuru === "siradan" ? "#111" : "var(--fg)",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
+                🔵 Sıradan (Maks 18)
+              </button>
+              <button
+                type="button"
+                onClick={() => setEkipmanTuru("destansi")}
+                style={{
+                  padding: "8px 0",
+                  borderRadius: 8,
+                  border: ekipmanTuru === "destansi" ? "1px solid #a855f7" : "1px solid var(--cizgi)",
+                  background: ekipmanTuru === "destansi" ? "#a855f7" : "var(--bg)",
+                  color: ekipmanTuru === "destansi" ? "#fff" : "var(--fg)",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
+                🟣 Destansı (Maks 27)
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <label style={{ fontSize: 13 }}>
+              Mevcut Seviye
+              <select
+                value={ekipmanMevcut}
+                onChange={(e) => {
+                  const yeni = Number(e.target.value);
+                  setEkipmanMevcut(yeni);
+                  if (ekipmanHedef <= yeni) setEkipmanHedef(Math.min(maksEkipmanSeviyesi, yeni + 1));
+                }}
+                style={{
+                  width: "100%",
+                  marginTop: 4,
+                  padding: 10,
+                  borderRadius: 8,
+                  border: "1px solid var(--cizgi)",
+                  background: "var(--bg)",
+                  color: "var(--fg)",
+                }}
+              >
+                {Array.from({ length: maksEkipmanSeviyesi - 1 }, (_, i) => i + 1).map((s) => (
+                  <option key={s} value={s}>
+                    Seviye {s}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label style={{ fontSize: 13 }}>
+              Hedef Seviye
+              <select
+                value={ekipmanHedef}
+                onChange={(e) => setEkipmanHedef(Number(e.target.value))}
+                style={{
+                  width: "100%",
+                  marginTop: 4,
+                  padding: 10,
+                  borderRadius: 8,
+                  border: "1px solid var(--cizgi)",
+                  background: "var(--bg)",
+                  color: "var(--fg)",
+                }}
+              >
+                {Array.from({ length: maksEkipmanSeviyesi }, (_, i) => i + 1)
+                  .filter((s) => s > ekipmanMevcut)
+                  .map((s) => (
+                    <option key={s} value={s}>
+                      Seviye {s}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          </div>
+
+          <div
+            style={{
+              marginTop: "auto",
+              padding: 14,
+              borderRadius: 10,
+              background: "var(--bg)",
+              border: "1px solid var(--cizgi)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700 }}>
+              <span style={{ color: "#38bdf8" }}>🔵 Parlak Cevher:</span>
+              <span>{sayiFormatla(toplamParlak)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700 }}>
+              <span style={{ color: "#c084fc" }}>🟣 Parıltılı Cevher:</span>
+              <span>{sayiFormatla(toplamPariltili)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700 }}>
+              <span style={{ color: "#facc15" }}>⭐ Yıldızlı Cevher:</span>
+              <span>{ekipmanTuru === "siradan" ? "0 (Gerekmez)" : sayiFormatla(toplamYildizli)}</span>
             </div>
           </div>
         </section>

@@ -2,12 +2,32 @@ import { NextResponse } from "next/server";
 
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
-type Parca = { name: string; level: number; maxLevel: number; village?: string };
+type Ekipman = { name: string; level: number; maxLevel: number };
+type Parca = {
+  name: string;
+  level: number;
+  maxLevel: number;
+  village?: string;
+  equipment?: Ekipman[];
+};
 
 function ana(liste: Parca[] | undefined) {
   return (liste ?? [])
     .filter((p) => p.village === "home" || p.village === undefined)
-    .map((p) => ({ isim: p.name, seviye: p.level, azami: p.maxLevel }));
+    .map((p) => ({
+      isim: p.name,
+      seviye: p.level,
+      azami: p.maxLevel,
+      ...(p.equipment
+        ? {
+            aktifEkipmanlar: p.equipment.map((e) => ({
+              isim: e.name,
+              seviye: e.level,
+              azami: e.maxLevel,
+            })),
+          }
+        : {}),
+    }));
 }
 
 export async function GET(request: Request) {
@@ -47,6 +67,10 @@ export async function GET(request: Request) {
       thSeviyesi: v.townHallLevel,
       kupa: v.trophies,
       klan: v.clan?.name ?? null,
+      klanKod: v.clan?.tag ?? null,
+      klanRozet: v.clan?.badgeUrls?.medium ?? null,
+      ligAdi: v.league?.name ?? null,
+      ligIkonu: v.league?.iconUrls?.medium ?? null,
       kahramanlar: ana(v.heroes),
       birlikler: ana(v.troops),
       buyuler: ana(v.spells),
