@@ -118,7 +118,7 @@ const SOZLUK: Record<string, string> = {
   "Rocket Backpack": "Sırt Roketi",
   "Revenge Deck": "İntikam Destesi",
   "Portal Pendant": "Portal Kolyesi",
-    "Super Bowler": "Süper Atıcı",
+  "Super Bowler": "Süper Atıcı",
   "Super Witch": "Süper Cadı",
   "Inferno Dragon": "Cehennem Ejderhası",
   "Rocket Balloon": "Roket Balon",
@@ -134,6 +134,12 @@ const SOZLUK: Record<string, string> = {
   "Inferno Tower": "Cehennem Kulesi",
   "Eagle Artillery": "Kartal Topu",
   "Scattershot": "Kayasaçar",
+  "Builder's Hut": "Silahlı İnşaatçı Kulübesi",
+  "Spell Tower": "Büyü Kulesi",
+  "Monolith": "Monolit",
+  "Ricochet Cannon": "Seken Top",
+  "Multi-Archer Tower": "Çoklu Okçu Kulesi",
+  "Firespitter": "Ateş Püskürtücü",
 };
 
 export function tr(isim: string): string {
