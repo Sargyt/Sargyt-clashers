@@ -3,14 +3,69 @@ import { useState, type FormEvent } from "react";
 
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
+type Parca = { isim: string; seviye: number; azami: number };
+
 type Oyuncu = {
   kod: string;
   isim: string;
   thSeviyesi: number;
   kupa: number;
   klan: string | null;
-  kahramanlar: { isim: string; seviye: number; azami: number }[];
+  kahramanlar: Parca[];
+  birlikler: Parca[];
+  buyuler: Parca[];
+  ekipmanlar: Parca[];
 };
+
+const PETLER = [
+  "L.A.S.S.I", "Mighty Yak", "Electro Owl", "Unicorn", "Phoenix",
+  "Poison Lizard", "Diggy", "Frosty", "Spirit Fox", "Angry Jelly",
+  "Sneezy", "Greedy Raven",
+];
+const SUPER_EK = ["Sneaky Goblin", "Rocket Balloon", "Inferno Dragon", "Ice Hound"];
+
+const superMi = (p: Parca) => p.isim.startsWith("Super ") || SUPER_EK.includes(p.isim);
+
+function yuzde(liste: Parca[]) {
+  const s = liste.reduce((t, p) => t + p.seviye, 0);
+  const m = liste.reduce((t, p) => t + p.azami, 0);
+  return m ? Math.round((s / m) * 100) : 0;
+}
+
+function Satir({ p }: { p: Parca }) {
+  return (
+    <div>
+      <div style={{ fontSize: 14 }}>
+        {p.isim}: {p.seviye}/{p.azami}
+      </div>
+      <div style={{ height: 8, background: "var(--cizgi)", borderRadius: 6, overflow: "hidden" }}>
+        <div
+          style={{
+            height: "100%",
+            width: Math.round((p.seviye / p.azami) * 100) + "%",
+            background: "var(--vurgu)",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function Bolum({ baslik, liste }: { baslik: string; liste: Parca[] }) {
+  if (liste.length === 0) return null;
+  return (
+    <div style={{ marginTop: 20 }}>
+      <h3 style={{ marginBottom: 8 }}>
+        {baslik} · %{yuzde(liste)}
+      </h3>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+        {liste.map((p) => (
+          <Satir key={p.isim} p={p} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const [kod, setKod] = useState("");
@@ -42,12 +97,17 @@ export default function Home() {
     setYukleniyor(false);
   }
 
+  const normal = oyuncu ? oyuncu.birlikler.filter((p) => !superMi(p) && !PETLER.includes(p.isim)) : [];
+  const petler = oyuncu ? oyuncu.birlikler.filter((p) => PETLER.includes(p.isim)) : [];
+  const supers = oyuncu ? oyuncu.birlikler.filter(superMi) : [];
+  const hepsi = oyuncu
+    ? [...oyuncu.kahramanlar, ...oyuncu.ekipmanlar, ...normal, ...petler, ...oyuncu.buyuler]
+    : [];
+
   return (
-    <main style={{ padding: "40px 20px", maxWidth: 640, margin: "0 auto" }}>
+    <main style={{ padding: "40px 20px", maxWidth: 800, margin: "0 auto" }}>
       <h1 style={{ fontSize: 32, margin: "0 0 8px" }}>Köyünü analiz et</h1>
-      <p style={{ opacity: 0.75, marginTop: 0 }}>
-        Köy kodunu gir, gelişim durumunu gör.
-      </p>
+      <p style={{ opacity: 0.75, marginTop: 0 }}>Köy kodunu gir, gelişim durumunu gör.</p>
 
       <form onSubmit={ara} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
@@ -99,31 +159,33 @@ export default function Home() {
             {oyuncu.kod} · Belediye Binası {oyuncu.thSeviyesi} · 🏆 {oyuncu.kupa}
             {oyuncu.klan ? " · Klan: " + oyuncu.klan : ""}
           </p>
-          <h3>Kahramanlar</h3>
-          {oyuncu.kahramanlar.length === 0 && <p>Kahraman bulunamadı.</p>}
-          {oyuncu.kahramanlar.map((h) => (
-            <div key={h.isim} style={{ marginBottom: 12 }}>
-              <div>
-                {h.isim}: {h.seviye}/{h.azami}
-              </div>
-              <div
-                style={{
-                  height: 10,
-                  background: "var(--cizgi)",
-                  borderRadius: 6,
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    height: "100%",
-                    width: Math.round((h.seviye / h.azami) * 100) + "%",
-                    background: "var(--vurgu)",
-                  }}
-                />
-              </div>
+
+          <div style={{ marginTop: 8 }}>
+            <strong>Genel ilerleme: %{yuzde(hepsi)}</strong>
+            <div style={{ height: 12, background: "var(--cizgi)", borderRadius: 8, overflow: "hidden", marginTop: 6 }}>
+              <div style={{ height: "100%", width: yuzde(hepsi) + "%", background: "var(--vurgu)" }} />
             </div>
-          ))}
+          </div>
+
+          <Bolum baslik="Kahramanlar" liste={oyuncu.kahramanlar} />
+          <Bolum baslik="Ekipmanlar" liste={oyuncu.ekipmanlar} />
+          <Bolum baslik="Birlikler" liste={normal} />
+          <Bolum baslik="Büyüler" liste={oyuncu.buyuler} />
+          <Bolum baslik="Evcil Hayvanlar" liste={petler} />
+
+          {supers.length > 0 && (
+            <details style={{ marginTop: 20 }}>
+              <summary style={{ cursor: "pointer" }}>Süper birlikler ({supers.length})</summary>
+              <p style={{ opacity: 0.75, fontSize: 14 }}>
+                Bunlar normal birliklerin geçici güçlenmiş halleridir, genel ilerlemeye dahil edilmez.
+              </p>
+              <ul style={{ columns: 2, fontSize: 14 }}>
+                {supers.map((p) => (
+                  <li key={p.isim}>{p.isim}</li>
+                ))}
+              </ul>
+            </details>
+          )}
         </section>
       )}
     </main>
