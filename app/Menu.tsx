@@ -41,6 +41,9 @@ export default function Menu() {
         borderBottom: "1px solid var(--cizgi)",
         background: "var(--kart)",
         flexWrap: "wrap",
+                position: "sticky",
+        top: 0,
+        zIndex: 10,
       }}
     >
       <strong style={{ marginRight: 16 }}>⚔️ Sargyt Clashers</strong>

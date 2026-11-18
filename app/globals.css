@@ -37,3 +37,36 @@ body {
 a {
   color: var(--vurgu);
 }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+input,
+select,
+button {
+  font-size: 16px;
+  font-family: inherit;
+}
+
+button {
+  min-height: 44px;
+}
+
+h1 {
+  line-height: 1.2;
+}
+
+@media (max-width: 600px) {
+  nav {
+    padding: 10px 14px !important;
+    gap: 4px !important;
+  }
+  main {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+}
