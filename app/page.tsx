@@ -210,54 +210,46 @@ function yuzde(liste: Parca[]) {
   return m ? Math.round((s / m) * 100) : 0;
 }
 
+function isimBoyutu(isim: string) {
+  const n = isim.length;
+  if (n <= 7) return 58;
+  if (n <= 10) return 48;
+  if (n <= 14) return 38;
+  return 30;
+}
+
 function ProfilBbGorsel({ seviye }: { seviye: number }) {
   const [hata, setHata] = useState(false);
 
+  const kutu = {
+    width: "clamp(130px, 17vw, 230px)",
+    aspectRatio: "1 / 1",
+    borderRadius: 22,
+    background: "var(--bg)",
+    border: "1px solid var(--cizgi)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 6,
+    flexShrink: 0,
+  } as const;
+
   if (hata) {
     return (
-      <div
-        style={{
-          width: 176,
-          height: 176,
-          borderRadius: 22,
-          background: "var(--bg)",
-          border: "1px solid var(--cizgi)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        <span style={{ fontSize: 58 }}>🏰</span>
-        <span style={{ fontSize: 15, fontWeight: 900, color: "var(--vurgu)" }}>BB {seviye}</span>
+      <div style={{ ...kutu, flexDirection: "column" }}>
+        <span style={{ fontSize: 64 }}>🏰</span>
+        <span style={{ fontSize: 16, fontWeight: 900, color: "var(--vurgu)" }}>BB {seviye}</span>
       </div>
     );
   }
 
   return (
-    <div
-      title={`Belediye Binası ${seviye}`}
-      style={{
-        width: 178,
-        height: 178,
-        borderRadius: 22,
-        background: "var(--bg)",
-        border: "1px solid var(--cizgi)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 6,
-        flexShrink: 0,
-      }}
-    >
+    <div title={`Belediye Binası ${seviye}`} style={kutu}>
       <img
         src={`/birimler/th${seviye}.png`}
         alt={`Belediye Binası ${seviye}`}
-        width={160}
-        height={160}
         onError={() => setHata(true)}
-        style={{ objectFit: "contain", display: "block" }}
+        style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
       />
     </div>
   );
@@ -881,18 +873,10 @@ export default function Home() {
               gap: 10,
             }}
           >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
-                gap: 18,
-                alignItems: "stretch",
-              }}
-            >
-              {/* SOL + ORTA: En Solda Büyük BB + İsim/Kod/BB/Profil Kartı + Klan Amblemi + Efsane III & Favori */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 18, alignItems: "stretch" }}>
               <div
                 style={{
-                  gridColumn: "span 2",
+                  flex: "5 1 640px",
                   minWidth: 0,
                   display: "flex",
                   alignItems: "center",
@@ -901,12 +885,22 @@ export default function Home() {
                   flexWrap: "wrap",
                 }}
               >
-                {/* EN SOL: Büyük BB Görseli + İsim -> Köy Kodu -> Belediye 19 -> Büyük Profil Kartı */}
                 <div style={{ display: "flex", alignItems: "center", gap: 18, minWidth: 0, flex: "1 1 320px" }}>
                   <ProfilBbGorsel seviye={oyuncu.thSeviyesi} />
 
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 7, minWidth: 0 }}>
-                    <h2 style={{ margin: 0, fontSize: 44, fontWeight: 900, lineHeight: 1.02 }}>{oyuncu.isim}</h2>
+                    <h2
+                      style={{
+                        margin: 0,
+                        fontSize: isimBoyutu(oyuncu.isim),
+                        fontWeight: 900,
+                        lineHeight: 1.05,
+                        overflowWrap: "anywhere",
+                        maxWidth: "100%",
+                      }}
+                    >
+                      {oyuncu.isim}
+                    </h2>
 
                     <span style={{ fontSize: 15, fontWeight: 700, opacity: 0.85 }}>{oyuncu.kod}</span>
 
@@ -947,7 +941,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* KLAN AMBLEMİ + KLAN GEÇİŞ BUTONU */}
                 {oyuncu.klan && (
                   <div
                     style={{
@@ -955,9 +948,9 @@ export default function Home() {
                       flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: 10,
+                      gap: 12,
                       padding: "10px 14px",
-                      minWidth: 156,
+                      width: 220,
                       flexShrink: 0,
                     }}
                   >
@@ -965,12 +958,12 @@ export default function Home() {
                       <img
                         src={oyuncu.klanRozet}
                         alt={oyuncu.klan}
-                        width={104}
-                        height={104}
+                        width={150}
+                        height={150}
                         style={{ objectFit: "contain", display: "block" }}
                       />
                     ) : (
-                      <span style={{ fontSize: 52 }}>🛡️</span>
+                      <span style={{ fontSize: 76 }}>🛡️</span>
                     )}
 
                     {oyuncu.klanKod ? (
@@ -981,29 +974,31 @@ export default function Home() {
                           alignItems: "center",
                           justifyContent: "center",
                           gap: 6,
-                          padding: "10px 16px",
-                          borderRadius: 12,
+                          padding: "13px 20px",
+                          borderRadius: 14,
                           background: "var(--bg)",
-                          border: "1px solid var(--vurgu)",
+                          border: "2px solid var(--vurgu)",
                           color: "var(--vurgu)",
                           textDecoration: "none",
-                          fontSize: 14.5,
+                          fontSize: 17,
                           fontWeight: 800,
-                          whiteSpace: "nowrap",
+                          textAlign: "center",
+                          lineHeight: 1.25,
+                          maxWidth: "100%",
+                          overflowWrap: "anywhere",
                         }}
                       >
                         <span>{oyuncu.klan}</span>
                         <span>↗</span>
                       </Link>
                     ) : (
-                      <span style={{ fontSize: 14.5, fontWeight: 800, textAlign: "center", whiteSpace: "nowrap" }}>
+                      <span style={{ fontSize: 17, fontWeight: 800, textAlign: "center", overflowWrap: "anywhere" }}>
                         {oyuncu.klan}
                       </span>
                     )}
                   </div>
                 )}
 
-                {/* BÜYÜK LİG ROZETİ + FAVORİ */}
                 <div
                   style={{
                     display: "flex",
@@ -1071,9 +1066,9 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* SAĞ SÜTUN: Sıkıştırılmış Genel Köy Tamamlanması */}
               <div
                 style={{
+                  flex: "1 1 300px",
                   minWidth: 0,
                   padding: "16px 18px",
                   background: "var(--bg)",
@@ -1141,7 +1136,6 @@ export default function Home() {
               <p style={{ margin: 0, fontSize: 12, color: "var(--vurgu)", fontWeight: 600 }}>{favoriMesaj}</p>
             )}
           </section>
-
           {/* ALT KISIM: Sekmeli Kategori Alanı */}
           <section
             style={{
