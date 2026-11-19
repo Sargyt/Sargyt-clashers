@@ -222,7 +222,7 @@ function ProfilBbGorsel({ seviye }: { seviye: number }) {
   const [hata, setHata] = useState(false);
 
   const kutu = {
-    width: "clamp(120px, 14vw, 216px)",
+    width: "clamp(120px, 14vw, 248px)",
     aspectRatio: "1 / 1",
     borderRadius: 22,
     background: "var(--bg)",
@@ -530,6 +530,49 @@ function GenisKategoriBolumu({
           )
         )}
       </div>
+    </div>
+  );
+}
+
+const KUTU_Y = 44;
+const IKON = 144;
+
+const BLOK = {
+  width: 184,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 8,
+} as const;
+
+const etiketStil = (vurgulu: boolean) =>
+  ({
+    width: "100%",
+    height: KUTU_Y,
+    padding: "0 10px",
+    borderRadius: 14,
+    background: "var(--bg)",
+    border: "2px solid " + (vurgulu ? "var(--vurgu)" : "var(--cizgi)"),
+    color: vurgulu ? "var(--vurgu)" : "var(--fg)",
+    fontSize: 15,
+    fontWeight: 800,
+    textDecoration: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+  }) as const;
+
+function BlokIkon({ src, alt, yedek }: { src?: string | null; alt: string; yedek: string }) {
+  return (
+    <div style={{ height: IKON, width: IKON, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      {src ? (
+        <img src={src} alt={alt} style={{ height: IKON, width: IKON, objectFit: "contain", display: "block" }} />
+      ) : (
+        <span style={{ fontSize: 80 }}>{yedek}</span>
+      )}
     </div>
   );
 }
@@ -874,7 +917,6 @@ export default function Home() {
             }}
           >
             <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center" }}>
-              {/* 1) BB görseli + isim bloğu */}
               <div style={{ display: "flex", alignItems: "center", gap: 18, flex: "1 1 500px" }}>
                 <ProfilBbGorsel seviye={oyuncu.thSeviyesi} />
 
@@ -902,25 +944,26 @@ export default function Home() {
                     {oyuncu.isim}
                   </h2>
 
-                  <span style={{ fontSize: 15, fontWeight: 700, opacity: 0.85 }}>{oyuncu.kod}</span>
-
-                  <span
-                    style={{
-                      padding: "5px 13px",
-                      borderRadius: 10,
-                      background: "var(--vurgu)",
-                      color: "#111",
-                      fontWeight: 900,
-                      fontSize: 14,
-                    }}
-                  >
-                    Belediye {oyuncu.thSeviyesi}
-                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, opacity: 0.85 }}>{oyuncu.kod}</span>
+                    <span
+                      style={{
+                        padding: "4px 12px",
+                        borderRadius: 10,
+                        background: "var(--vurgu)",
+                        color: "#111",
+                        fontWeight: 900,
+                        fontSize: 14,
+                      }}
+                    >
+                      Belediye {oyuncu.thSeviyesi}
+                    </span>
+                  </div>
 
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
+                      gridTemplateColumns: "1fr " + KUTU_Y + "px",
                       gap: 10,
                       width: "100%",
                       marginTop: 4,
@@ -930,8 +973,8 @@ export default function Home() {
                       type="button"
                       onClick={() => setProfilKartiAcik(true)}
                       style={{
-                        minHeight: 48,
-                        padding: "0 10px",
+                        height: KUTU_Y,
+                        padding: "0 12px",
                         borderRadius: 14,
                         border: "2px solid var(--vurgu)",
                         background: "rgba(245, 197, 66, 0.16)",
@@ -942,211 +985,129 @@ export default function Home() {
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: 6,
+                        gap: 8,
                         whiteSpace: "nowrap",
                       }}
                     >
                       <span style={{ fontSize: 18 }}>🎴</span>
-                      <span>Profil Kartı</span>
+                      <span>Profil Kartını Aç</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => favoriyeEkle(oyuncu)}
                       title={favoriEklendi ? "Favorilerinden çıkar" : "Favorilere ekle"}
+                      aria-label={favoriEklendi ? "Favorilerinden çıkar" : "Favorilere ekle"}
                       style={{
-                        minHeight: 48,
-                        padding: "0 10px",
+                        width: KUTU_Y,
+                        height: KUTU_Y,
+                        padding: 0,
                         borderRadius: 14,
                         border: "2px solid " + (favoriEklendi ? "var(--vurgu)" : "var(--cizgi)"),
                         background: favoriEklendi ? "rgba(245, 197, 66, 0.16)" : "var(--bg)",
                         color: favoriEklendi ? "var(--vurgu)" : "var(--fg)",
                         cursor: "pointer",
-                        fontSize: 15,
-                        fontWeight: 900,
+                        fontSize: 22,
+                        lineHeight: 1,
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: 6,
-                        whiteSpace: "nowrap",
                       }}
                     >
-                      <span style={{ fontSize: 18 }}>{favoriEklendi ? "★" : "☆"}</span>
-                      <span>{favoriEklendi ? "Favori" : "Favori"}</span>
+                      {favoriEklendi ? "★" : "☆"}
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* 2) Klan ve lig blokları: birebir aynı ölçüler, şeffaf arka plan */}
               <div style={{ display: "flex", gap: 16, flex: "0 0 auto" }}>
                 {oyuncu.klan && (
-                  <div style={{ width: 176, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                    <div style={{ height: 128, width: 128, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {oyuncu.klanRozet ? (
-                        <img
-                          src={oyuncu.klanRozet}
-                          alt={oyuncu.klan}
-                          style={{ height: 128, width: 128, objectFit: "contain", display: "block" }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: 72 }}>🛡️</span>
-                      )}
-                    </div>
-
+                  <div style={BLOK}>
+                    <BlokIkon src={oyuncu.klanRozet} alt={oyuncu.klan} yedek="🛡️" />
                     {oyuncu.klanKod ? (
                       <Link
                         href={"/klanlar?kod=" + oyuncu.klanKod.replace(/^#/, "")}
-                        style={{
-                          width: "100%",
-                          height: 48,
-                          padding: "0 10px",
-                          borderRadius: 14,
-                          background: "var(--bg)",
-                          border: "2px solid var(--vurgu)",
-                          color: "var(--vurgu)",
-                          textDecoration: "none",
-                          fontSize: 15,
-                          fontWeight: 800,
-                          textAlign: "center",
-                          lineHeight: 1.1,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 5,
-                          overflow: "hidden",
-                        }}
+                        title={oyuncu.klan}
+                        style={etiketStil(true)}
                       >
-                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {oyuncu.klan}
-                        </span>
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{oyuncu.klan}</span>
                         <span>↗</span>
                       </Link>
                     ) : (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: 48,
-                          padding: "0 10px",
-                          borderRadius: 14,
-                          background: "var(--bg)",
-                          border: "2px solid var(--cizgi)",
-                          fontSize: 15,
-                          fontWeight: 800,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {oyuncu.klan}
+                      <div title={oyuncu.klan} style={etiketStil(true)}>
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{oyuncu.klan}</span>
                       </div>
                     )}
-
-                    <span style={{ fontSize: 14, fontWeight: 700, opacity: 0.7, height: 20, lineHeight: "20px" }}>
-                      Klan
-                    </span>
+                    <div style={etiketStil(false)}>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {oyuncu.klanKod || "Klan"}
+                      </span>
+                    </div>
                   </div>
                 )}
 
-                <div style={{ width: 176, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                  <div style={{ height: 128, width: 128, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {oyuncu.ligIkon ? (
-                      <img
-                        src={oyuncu.ligIkon}
-                        alt={oyuncu.lig ? ligTr(oyuncu.lig) : "Lig"}
-                        style={{ height: 128, width: 128, objectFit: "contain", display: "block" }}
-                      />
-                    ) : (
-                      <span style={{ fontSize: 72 }}>🏆</span>
-                    )}
+                <div style={BLOK}>
+                  <BlokIkon
+                    src={oyuncu.ligIkon}
+                    alt={oyuncu.lig ? ligTr(oyuncu.lig) : "Lig"}
+                    yedek="🏆"
+                  />
+                  <div title={oyuncu.lig ? ligTr(oyuncu.lig) : "Ligsiz"} style={etiketStil(true)}>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {oyuncu.lig ? ligTr(oyuncu.lig) : "Ligsiz"}
+                    </span>
                   </div>
-
-                  <div
-                    style={{
-                      width: "100%",
-                      height: 48,
-                      padding: "0 10px",
-                      borderRadius: 14,
-                      background: "var(--bg)",
-                      border: "2px solid var(--vurgu)",
-                      color: "var(--vurgu)",
-                      fontSize: 15,
-                      fontWeight: 800,
-                      textAlign: "center",
-                      lineHeight: 1.1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {oyuncu.lig ? ligTr(oyuncu.lig) : "Ligsiz"}
-                  </div>
-
-                  <span style={{ fontSize: 14, fontWeight: 800, opacity: 0.9, height: 20, lineHeight: "20px" }}>
-                    🏆 {oyuncu.kupa}
-                  </span>
+                  <div style={etiketStil(false)}>🏆 {oyuncu.kupa}</div>
                 </div>
               </div>
 
-              {/* 3) Genel Köy Tamamlanması */}
               <div
                 style={{
                   flex: "1 1 280px",
                   minWidth: 280,
-                  alignSelf: "stretch",
-                  padding: "16px 18px",
+                  minHeight: IKON + 2 * 8 + 2 * KUTU_Y,
+                  alignSelf: "center",
+                  padding: "14px 16px",
                   background: "var(--bg)",
                   border: "1px solid var(--cizgi)",
                   borderRadius: 16,
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
-                  gap: 12,
+                  gap: 10,
                 }}
               >
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                    <strong style={{ fontSize: 14.5 }}>Genel Köy Tamamlanması (BB {oyuncu.thSeviyesi})</strong>
+                  <strong style={{ fontSize: 14.5, display: "block" }}>
+                    Genel Köy Tamamlanması (BB {oyuncu.thSeviyesi})
+                  </strong>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+                    <div style={{ flex: 1, height: 10, background: "var(--cizgi)", borderRadius: 10, overflow: "hidden" }}>
+                      <div
+                        style={{
+                          height: "100%",
+                          width: yuzde(hepsi) + "%",
+                          background: "var(--vurgu)",
+                          transition: "width 0.4s ease",
+                        }}
+                      />
+                    </div>
                     <strong style={{ fontSize: 21, color: "var(--vurgu)" }}>%{yuzde(hepsi)}</strong>
-                  </div>
-                  <div
-                    style={{
-                      height: 10,
-                      background: "var(--cizgi)",
-                      borderRadius: 10,
-                      overflow: "hidden",
-                      marginTop: 9,
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: yuzde(hepsi) + "%",
-                        background: "var(--vurgu)",
-                        transition: "width 0.4s ease",
-                      }}
-                    />
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.85, marginBottom: 7 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.85, marginBottom: 6 }}>
                     {enCokEksikler.length > 0 ? "⚡ Öncelikli Yükseltmeler:" : "🎉 Bu Belediye Binası tamamen dolu!"}
                   </div>
                   {enCokEksikler.length > 0 && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                       {enCokEksikler.map((p) => (
                         <span
                           key={p.isim}
                           style={{
                             fontSize: 11,
-                            padding: "4px 8px",
+                            padding: "3px 8px",
                             borderRadius: 8,
                             background: "var(--kart)",
                             border: "1px solid var(--cizgi)",
@@ -1165,9 +1126,7 @@ export default function Home() {
             {favoriMesaj && (
               <p style={{ margin: 0, fontSize: 12, color: "var(--vurgu)", fontWeight: 600 }}>{favoriMesaj}</p>
             )}
-          </section>          
-          {/* ALT KISIM: Sekmeli Kategori Alanı */}
-          <section
+          </section>          <section
             style={{
               padding: 24,
               background: "var(--kart)",
