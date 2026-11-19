@@ -286,11 +286,10 @@ export default function DuzenlerSayfasi() {
     }
   }
 
-  async function kopyalamaArtir(duzen: Duzen) {
+ async function kopyalamaArtir(duzen: Duzen) {
     const yeniSayi = (duzen.kopyalama ?? 0) + 1;
     setDuzenler((prev) => prev.map((d) => (d.id === duzen.id ? { ...d, kopyalama: yeniSayi } : d)));
-    await supabase.from("koy_duzenleri").update({ kopyalama: yeniSayi }).eq("id", duzen.id);
-  }
+await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
 
   function netSkorHesapla(duzenId: string): number {
     return oylar.filter((o) => o.duzen_id === duzenId).reduce((toplam, o) => toplam + o.oy, 0);

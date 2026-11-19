@@ -243,17 +243,16 @@ export default function ForumSayfasi() {
       localStorage.setItem("sargyt_forum_oylar", JSON.stringify(guncelOylar));
     } catch {}
 
-    await supabase.from("forum_konular").update({ oylar: yeniOy }).eq("id", konu.id);
-  }
+await supabase.rpc("forum_oy_artir", { hedef_id: konu.id });  }
 
   async function durumDegistir(konu: Konu) {
     const yeniDurum = !konu.kapali;
-    const { error } = await supabase
-      .from("forum_konular")
-      .update({ kapali: yeniDurum })
-      .eq("id", konu.id);
+    const { data, error } = await supabase.rpc("forum_durum_degistir", {
+      hedef_id: konu.id,
+      yeni_kapali: yeniDurum,
+    });
 
-    if (!error) {
+    if (!error && data === true) {
       setKonular((prev) =>
         prev.map((k) => (k.id === konu.id ? { ...k, kapali: yeniDurum } : k))
       );
