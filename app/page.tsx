@@ -222,7 +222,7 @@ function ProfilBbGorsel({ seviye }: { seviye: number }) {
   const [hata, setHata] = useState(false);
 
   const kutu = {
-    width: "clamp(130px, 17vw, 230px)",
+    width: "clamp(120px, 14vw, 216px)",
     aspectRatio: "1 / 1",
     borderRadius: 22,
     background: "var(--bg)",
@@ -864,7 +864,7 @@ export default function Home() {
           {/* TEK BİRLEŞİK ÜST KART */}
           <section
             style={{
-              padding: "16px 20px",
+              padding: "20px 24px",
               background: "var(--kart)",
               border: "1px solid var(--cizgi)",
               borderRadius: 18,
@@ -873,203 +873,233 @@ export default function Home() {
               gap: 10,
             }}
           >
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 18, alignItems: "stretch" }}>
-              <div
-                style={{
-                  flex: "5 1 640px",
-                  minWidth: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 18,
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 18, minWidth: 0, flex: "1 1 320px" }}>
-                  <ProfilBbGorsel seviye={oyuncu.thSeviyesi} />
-
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 7, minWidth: 0 }}>
-                    <h2
-                      style={{
-                        margin: 0,
-                        fontSize: isimBoyutu(oyuncu.isim),
-                        fontWeight: 900,
-                        lineHeight: 1.05,
-                        overflowWrap: "anywhere",
-                        maxWidth: "100%",
-                      }}
-                    >
-                      {oyuncu.isim}
-                    </h2>
-
-                    <span style={{ fontSize: 15, fontWeight: 700, opacity: 0.85 }}>{oyuncu.kod}</span>
-
-                    <span
-                      style={{
-                        padding: "5px 13px",
-                        borderRadius: 10,
-                        background: "var(--vurgu)",
-                        color: "#111",
-                        fontWeight: 900,
-                        fontSize: 14,
-                      }}
-                    >
-                      Belediye {oyuncu.thSeviyesi}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => setProfilKartiAcik(true)}
-                      style={{
-                        marginTop: 2,
-                        padding: "13px 24px",
-                        borderRadius: 14,
-                        border: "2px solid var(--vurgu)",
-                        background: "rgba(245, 197, 66, 0.16)",
-                        color: "var(--vurgu)",
-                        cursor: "pointer",
-                        fontSize: 16.5,
-                        fontWeight: 900,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 10,
-                      }}
-                    >
-                      <span style={{ fontSize: 22 }}>🎴</span>
-                      <span>Profil Kartını Aç</span>
-                    </button>
-                  </div>
-                </div>
-
-                {oyuncu.klan && (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 12,
-                      padding: "10px 14px",
-                      width: 220,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {oyuncu.klanRozet ? (
-                      <img
-                        src={oyuncu.klanRozet}
-                        alt={oyuncu.klan}
-                        width={150}
-                        height={150}
-                        style={{ objectFit: "contain", display: "block" }}
-                      />
-                    ) : (
-                      <span style={{ fontSize: 76 }}>🛡️</span>
-                    )}
-
-                    {oyuncu.klanKod ? (
-                      <Link
-                        href={"/klanlar?kod=" + oyuncu.klanKod.replace(/^#/, "")}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 6,
-                          padding: "13px 20px",
-                          borderRadius: 14,
-                          background: "var(--bg)",
-                          border: "2px solid var(--vurgu)",
-                          color: "var(--vurgu)",
-                          textDecoration: "none",
-                          fontSize: 17,
-                          fontWeight: 800,
-                          textAlign: "center",
-                          lineHeight: 1.25,
-                          maxWidth: "100%",
-                          overflowWrap: "anywhere",
-                        }}
-                      >
-                        <span>{oyuncu.klan}</span>
-                        <span>↗</span>
-                      </Link>
-                    ) : (
-                      <span style={{ fontSize: 17, fontWeight: 800, textAlign: "center", overflowWrap: "anywhere" }}>
-                        {oyuncu.klan}
-                      </span>
-                    )}
-                  </div>
-                )}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center" }}>
+              {/* 1) BB görseli + isim bloğu */}
+              <div style={{ display: "flex", alignItems: "center", gap: 18, flex: "1 1 500px" }}>
+                <ProfilBbGorsel seviye={oyuncu.thSeviyesi} />
 
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 10,
-                    alignSelf: "stretch",
-                    minWidth: 156,
-                    flexShrink: 0,
+                    alignItems: "flex-start",
+                    justifyContent: "center",
+                    gap: 8,
+                    flex: "1 1 280px",
+                    minWidth: 280,
                   }}
                 >
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: isimBoyutu(oyuncu.isim),
+                      fontWeight: 900,
+                      lineHeight: 1.05,
+                      overflowWrap: "anywhere",
+                      maxWidth: "100%",
+                    }}
+                  >
+                    {oyuncu.isim}
+                  </h2>
+
+                  <span style={{ fontSize: 15, fontWeight: 700, opacity: 0.85 }}>{oyuncu.kod}</span>
+
+                  <span
+                    style={{
+                      padding: "5px 13px",
+                      borderRadius: 10,
+                      background: "var(--vurgu)",
+                      color: "#111",
+                      fontWeight: 900,
+                      fontSize: 14,
+                    }}
+                  >
+                    Belediye {oyuncu.thSeviyesi}
+                  </span>
+
                   <div
                     style={{
-                      flex: 1,
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 10,
                       width: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 5,
-                      padding: "10px 14px",
-                      borderRadius: 16,
-                      background: "var(--bg)",
-                      border: "1px solid var(--cizgi)",
+                      marginTop: 4,
                     }}
                   >
-                    {oyuncu.ligIkon && (
-                      <img
-                        src={oyuncu.ligIkon}
-                        alt={oyuncu.lig ? ligTr(oyuncu.lig) : "Lig"}
-                        width={92}
-                        height={92}
-                        style={{ objectFit: "contain", display: "block" }}
-                      />
-                    )}
-                    <strong style={{ fontSize: 17, fontWeight: 900, color: "var(--vurgu)", textAlign: "center" }}>
-                      {oyuncu.lig ? ligTr(oyuncu.lig) : "Ligsiz"}
-                    </strong>
-                    <span style={{ fontSize: 14, fontWeight: 800, opacity: 0.9 }}>🏆 {oyuncu.kupa}</span>
-                  </div>
+                    <button
+                      type="button"
+                      onClick={() => setProfilKartiAcik(true)}
+                      style={{
+                        minHeight: 48,
+                        padding: "0 10px",
+                        borderRadius: 14,
+                        border: "2px solid var(--vurgu)",
+                        background: "rgba(245, 197, 66, 0.16)",
+                        color: "var(--vurgu)",
+                        cursor: "pointer",
+                        fontSize: 15,
+                        fontWeight: 900,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <span style={{ fontSize: 18 }}>🎴</span>
+                      <span>Profil Kartı</span>
+                    </button>
 
-                  <button
-                    onClick={() => favoriyeEkle(oyuncu)}
-                    title={favoriEklendi ? "Favorilerinden çıkar" : "Favorilere ekle"}
-                    style={{
-                      width: "100%",
-                      padding: "11px 16px",
-                      borderRadius: 13,
-                      border: favoriEklendi ? "1px solid var(--vurgu)" : "1px solid var(--cizgi)",
-                      background: favoriEklendi ? "rgba(245, 197, 66, 0.16)" : "var(--bg)",
-                      color: favoriEklendi ? "var(--vurgu)" : "var(--fg)",
-                      cursor: "pointer",
-                      fontSize: 15,
-                      fontWeight: 800,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 7,
-                    }}
-                  >
-                    <span>{favoriEklendi ? "★" : "☆"}</span>
-                    <span>{favoriEklendi ? "Favoride" : "Favori"}</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => favoriyeEkle(oyuncu)}
+                      title={favoriEklendi ? "Favorilerinden çıkar" : "Favorilere ekle"}
+                      style={{
+                        minHeight: 48,
+                        padding: "0 10px",
+                        borderRadius: 14,
+                        border: "2px solid " + (favoriEklendi ? "var(--vurgu)" : "var(--cizgi)"),
+                        background: favoriEklendi ? "rgba(245, 197, 66, 0.16)" : "var(--bg)",
+                        color: favoriEklendi ? "var(--vurgu)" : "var(--fg)",
+                        cursor: "pointer",
+                        fontSize: 15,
+                        fontWeight: 900,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <span style={{ fontSize: 18 }}>{favoriEklendi ? "★" : "☆"}</span>
+                      <span>{favoriEklendi ? "Favori" : "Favori"}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
+              {/* 2) Klan ve lig blokları: birebir aynı ölçüler, şeffaf arka plan */}
+              <div style={{ display: "flex", gap: 16, flex: "0 0 auto" }}>
+                {oyuncu.klan && (
+                  <div style={{ width: 176, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                    <div style={{ height: 128, width: 128, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {oyuncu.klanRozet ? (
+                        <img
+                          src={oyuncu.klanRozet}
+                          alt={oyuncu.klan}
+                          style={{ height: 128, width: 128, objectFit: "contain", display: "block" }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: 72 }}>🛡️</span>
+                      )}
+                    </div>
+
+                    {oyuncu.klanKod ? (
+                      <Link
+                        href={"/klanlar?kod=" + oyuncu.klanKod.replace(/^#/, "")}
+                        style={{
+                          width: "100%",
+                          height: 48,
+                          padding: "0 10px",
+                          borderRadius: 14,
+                          background: "var(--bg)",
+                          border: "2px solid var(--vurgu)",
+                          color: "var(--vurgu)",
+                          textDecoration: "none",
+                          fontSize: 15,
+                          fontWeight: 800,
+                          textAlign: "center",
+                          lineHeight: 1.1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 5,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {oyuncu.klan}
+                        </span>
+                        <span>↗</span>
+                      </Link>
+                    ) : (
+                      <div
+                        style={{
+                          width: "100%",
+                          height: 48,
+                          padding: "0 10px",
+                          borderRadius: 14,
+                          background: "var(--bg)",
+                          border: "2px solid var(--cizgi)",
+                          fontSize: 15,
+                          fontWeight: 800,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {oyuncu.klan}
+                      </div>
+                    )}
+
+                    <span style={{ fontSize: 14, fontWeight: 700, opacity: 0.7, height: 20, lineHeight: "20px" }}>
+                      Klan
+                    </span>
+                  </div>
+                )}
+
+                <div style={{ width: 176, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                  <div style={{ height: 128, width: 128, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {oyuncu.ligIkon ? (
+                      <img
+                        src={oyuncu.ligIkon}
+                        alt={oyuncu.lig ? ligTr(oyuncu.lig) : "Lig"}
+                        style={{ height: 128, width: 128, objectFit: "contain", display: "block" }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: 72 }}>🏆</span>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      width: "100%",
+                      height: 48,
+                      padding: "0 10px",
+                      borderRadius: 14,
+                      background: "var(--bg)",
+                      border: "2px solid var(--vurgu)",
+                      color: "var(--vurgu)",
+                      fontSize: 15,
+                      fontWeight: 800,
+                      textAlign: "center",
+                      lineHeight: 1.1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {oyuncu.lig ? ligTr(oyuncu.lig) : "Ligsiz"}
+                  </div>
+
+                  <span style={{ fontSize: 14, fontWeight: 800, opacity: 0.9, height: 20, lineHeight: "20px" }}>
+                    🏆 {oyuncu.kupa}
+                  </span>
+                </div>
+              </div>
+
+              {/* 3) Genel Köy Tamamlanması */}
               <div
                 style={{
-                  flex: "1 1 300px",
-                  minWidth: 0,
+                  flex: "1 1 280px",
+                  minWidth: 280,
+                  alignSelf: "stretch",
                   padding: "16px 18px",
                   background: "var(--bg)",
                   border: "1px solid var(--cizgi)",
@@ -1135,7 +1165,7 @@ export default function Home() {
             {favoriMesaj && (
               <p style={{ margin: 0, fontSize: 12, color: "var(--vurgu)", fontWeight: 600 }}>{favoriMesaj}</p>
             )}
-          </section>
+          </section>          
           {/* ALT KISIM: Sekmeli Kategori Alanı */}
           <section
             style={{
