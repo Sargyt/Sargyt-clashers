@@ -58,14 +58,18 @@ export async function GET(request: Request) {
     }
 
     const v = await yanit.json();
-    return NextResponse.json({
+      return NextResponse.json({
       kod: v.tag,
       isim: v.name,
       thSeviyesi: v.townHallLevel,
       kupa: v.trophies,
-      lig: v.league?.name ?? null,
-      ligIkon: v.league?.iconUrls?.medium ?? v.league?.iconUrls?.small ?? null,
-      klan: v.clan?.name ?? null,
+lig: v.leagueTier?.name ?? v.league?.name ?? null,
+      ligIkon:
+        v.leagueTier?.iconUrls?.large ??
+        v.leagueTier?.iconUrls?.small ??
+        v.league?.iconUrls?.medium ??
+        v.league?.iconUrls?.small ??
+        null,      klan: v.clan?.name ?? null,
       klanKod: v.clan?.tag ?? null,
       klanRozet: v.clan?.badgeUrls?.medium ?? v.clan?.badgeUrls?.small ?? null,
       kahramanlar: ana(v.heroes),

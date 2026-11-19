@@ -149,3 +149,54 @@ export function tr(isim: string): string {
   if (!t) return isim;
   return t === isim ? isim : t + " (" + isim + ")";
 }
+
+const LIG_BLOKLARI: [string, string][] = [
+  ["Electro Dragon League", "Elektro"],
+  ["Electro League", "Elektro"],
+  ["Electro", "Elektro"],
+  ["Dragon League", "Ejderha"],
+  ["Dragon", "Ejderha"],
+  ["Electro Titan League", "Titan"],
+  ["Titan League", "Titan"],
+  ["Titan", "Titan"],
+  ["PEKKA League", "P.E.K.K.A"],
+  ["P.E.K.K.A League", "P.E.K.K.A"],
+  ["P.E.K.K.A", "P.E.K.K.A"],
+  ["Golem League", "Golem"],
+  ["Golem", "Golem"],
+  ["Witch League", "Cadı"],
+  ["Witch", "Cadı"],
+  ["Valkyrie League", "Valkür"],
+  ["Valkyrie", "Valkür"],
+  ["Wizard League", "Büyücü"],
+  ["Wizard", "Büyücü"],
+  ["Archer League", "Okçu"],
+  ["Archer", "Okçu"],
+  ["Barbarian League", "Barbar"],
+  ["Barbarian", "Barbar"],
+  ["Skeleton League", "İskelet"],
+  ["Skeleton", "İskelet"],
+];
+
+export function ligTr(ligAdi?: string | null): string {
+  if (!ligAdi) return "Ligsiz";
+  const temiz = ligAdi.trim();
+  if (/unranked/i.test(temiz)) return "Ligsiz";
+
+  if (/legend/i.test(temiz)) {
+    if (/\b(iii|3)\b/i.test(temiz)) return "Efsane III";
+    if (/\b(ii|2)\b/i.test(temiz)) return "Efsane II";
+    if (/\b(i|1)\b/i.test(temiz)) return "Efsane I";
+    return "Efsane";
+  }
+
+  for (const [ing, trAd] of LIG_BLOKLARI) {
+    const eslesme = temiz.match(new RegExp(`^${ing}\\s*(.*)$`, "i"));
+    if (eslesme) {
+      const kalan = eslesme[1]?.trim();
+      return kalan ? `${trAd} ${kalan}` : trAd;
+    }
+  }
+
+  return temiz;
+}

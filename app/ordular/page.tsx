@@ -75,6 +75,7 @@ const TR_INGILIZCE_ESLEME: Record<string, string> = {
   "druid": "Druid",
   "fırın": "Furnace",
   "yıkım cadısı": "Ruin Witch",
+  
 
   // Süper Birlikler
   "süper barbar": "Super Barbarian",
@@ -211,6 +212,18 @@ const KAPASITE_TABLOSU: Record<string, number> = {
   "Overgrowth Spell": 2,
   "Ice Block Spell": 1,
   "Totem Spell": 1,
+  "Ruin Witch": 18,
+  "Doom Witch": 20,
+  "Wall Wrecker": 0,
+  "Battle Blimp": 0,
+  "Stone Slammer": 0,
+  "Siege Barracks": 0,
+  "Log Launcher": 0,
+  "Flame Flinger": 0,
+  "Battle Drill": 0,
+  "Troop Launcher": 0,
+  "Flying Barracks": 0,
+  "Sky Wagon": 0,
 };
 
 function metniParcala(metin?: string, varsayilanAdet: number | null = null): OrduParcasi[] {
@@ -734,6 +747,80 @@ const ORDULAR: Ordu[] = [
       "3. Aşama: Ejderhalar, Balonlar, Kaya Balonu (içinde 10 Balon) ve Büyük Koruyucu'yu tek hat üzerinden bırak.",
     ],
     oyunLinki: "https://link.clashofclans.com/tr?action=CopyArmy&army=u13x8-10x5-1x23s6x0-2x10-1x2-1x5",
+  },
+
+  {
+    ad: "BB18–19 Orman Binicisi & Elektro Titan Hücumu",
+    thMin: 18,
+    thMax: 19,
+    tur: "Yer",
+    zorluk: "Orta",
+    birlikler: "6 Orman Binicisi, 3 Elektro Titan, 5 Şifacı, 2 Buz Golem, 3 Süper Duvar Yıkıcı, 2 Kelle Avcısı, 2 Bebek Ejderha",
+    buyuler: "2 Sarmaşık, 2 Öfke, 2 Dondurma, 1 Zehir",
+    klanKalesiBirlik: "2 Yeti, 1 Valkyrie, 11 Okçu",
+    klanKalesiBuyu: "1 Öfke, 1 Dondurma",
+    kusatma: "Uçan Kışla",
+    ozet: "Üst Belediye Binası seviyelerinde duvarları Orman Binicileriyle kırarken Elektro Titan ve kahramanlarla merkeze sert giriş yapan sağlam yer ordusu.",
+    adimlar: [
+      "1. Aşama: Uçan Kışla ve Bebek Ejderha ile kanatları temizle.",
+      "2. Aşama: Orman Binicileri, Elektro Titanlar ve kahramanları aynı hat üzerinden merkeze sür.",
+      "3. Aşama: Ağır savunma bölgelerini Sarmaşık ve Dondurma ile kilitle.",
+    ],
+  },
+  {
+    ad: "BB18–19 Ejderha & Ejderha Binici Baskını",
+    thMin: 18,
+    thMax: 19,
+    tur: "Hava",
+    zorluk: "Kolay",
+    birlikler: "9 Ejderha, 5 Ejderha Binici, 8 Balon, 2 Bebek Ejderha",
+    buyuler: "3 Öfke, 3 Dondurma, 1 Zehir",
+    klanKalesiBirlik: "2 Ejderha Binici, 1 Balon",
+    klanKalesiBuyu: "1 Öfke, 1 Dondurma",
+    kusatma: "Kaya Balonu",
+    ozet: "Üst BB seviyelerinde hava savunmalarını ve merkez kuleleri hızlı eriten pratik ve güçlü hava ordusu.",
+    adimlar: [
+      "1. Aşama: Bebek Ejderha ve kahramanlarla dış binaları alıp yön ver.",
+      "2. Aşama: Ejderha, Ejderha Binici, Balon ve Kaya Balonunu savunma hattına sal.",
+      "3. Aşama: Kule ve kahramanlara karşı Öfke ve Dondurma zamanlamasını iyi ayarla.",
+    ],
+  },
+
+  {
+    ad: "BB18–19 Meteor Golem & Elektro Titan Ezme",
+    thMin: 18,
+    thMax: 19,
+    tur: "Yer",
+    zorluk: "Orta",
+    birlikler: "4 Meteor Golem, 3 Elektro Titan, 5 Şifacı, 3 Süper Duvar Yıkıcı, 2 Kelle Avcısı, 2 Bebek Ejderha",
+    buyuler: "2 Sarmaşık, 2 Öfke, 2 Dondurma, 1 Zehir",
+    klanKalesiBirlik: "2 Yeti, 1 Valkyrie, 11 Okçu",
+    klanKalesiBuyu: "1 Öfke, 1 Dondurma",
+    kusatma: "Uçan Kışla",
+    ozet: "Yüksek Belediye Binası seviyelerinde Meteor Golem ve Elektro Titan ikilisiyle merkeze ağır baskı kuran sağlam yer ordusu.",
+    adimlar: [
+      "1. Aşama: Uçan Kışla ve Bebek Ejderha ile dış binaları temizleyip ana orduya yön ver.",
+      "2. Aşama: Meteor Golem, Elektro Titan, Şifacı ve kahramanları aynı hat üzerinden merkeze sür.",
+      "3. Aşama: Ağır savunma bölgelerini Sarmaşık ve Dondurma ile kilitleyip temizliği tamamla.",
+    ],
+  },
+  {
+    ad: "BB18–19 Ejderha & Ejderha Binici Baskını",
+    thMin: 18,
+    thMax: 19,
+    tur: "Hava",
+    zorluk: "Kolay",
+    birlikler: "9 Ejderha, 5 Ejderha Binici, 8 Balon, 2 Bebek Ejderha",
+    buyuler: "3 Öfke, 3 Dondurma, 1 Zehir",
+    klanKalesiBirlik: "2 Ejderha Binici, 1 Balon",
+    klanKalesiBuyu: "1 Öfke, 1 Dondurma",
+    kusatma: "Kaya Balonu",
+    ozet: "Üst BB seviyelerinde hava savunmalarını ve merkez kuleleri hızlı eriten pratik ve güçlü hava ordusu.",
+    adimlar: [
+      "1. Aşama: Bebek Ejderha ve kahramanlarla dış binaları alıp yön ver.",
+      "2. Aşama: Ejderha, Ejderha Binici, Balon ve Kaya Balonunu savunma hattına sal.",
+      "3. Aşama: Kule ve kahramanlara karşı Öfke ve Dondurma zamanlamasını iyi ayarla.",
+    ],
   },
 ];
 

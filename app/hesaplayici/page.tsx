@@ -709,7 +709,7 @@ export default function HesaplayiciSayfasi() {
           </section>
         )}
 
-        {/* 3. TAŞ (GEM) HESAPLAYICI */}
+{/* 3. TAŞ (GEM) HESAPLAYICI */}
         {seciliArac === "tas" && (
           <section
             style={{
@@ -724,7 +724,7 @@ export default function HesaplayiciSayfasi() {
           >
             <h2 style={{ margin: 0, fontSize: 22 }}>💎 Taş (Gem) Süre Hesaplayıcı</h2>
             <p style={{ margin: 0, fontSize: 14, opacity: 0.78 }}>
-              Kalan inşaat veya araştırma süresini gir, anında bitirmek için gereken Yeşil Taşı gör.
+              Kalan inşaat veya araştırma süresini gir; anında bitirme taşını ve Goblin İnşaatçı maliyetini gör.
             </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
@@ -792,26 +792,56 @@ export default function HesaplayiciSayfasi() {
               </label>
             </div>
 
-            <div
-              style={{
-                padding: 22,
-                borderRadius: 12,
-                background: "var(--bg)",
-                border: "1px solid var(--cizgi)",
-                textAlign: "center",
-              }}
-            >
-              <div style={{ fontSize: 14, opacity: 0.78 }}>Anında Bitirme Maliyeti</div>
-              <div style={{ fontSize: 36, fontWeight: 900, color: "#22c55e", marginTop: 6 }}>
-                💎 {sayiFormatla(gerekenTas)} Taş
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              <div
+                style={{
+                  padding: 20,
+                  borderRadius: 12,
+                  background: "var(--bg)",
+                  border: "1px solid var(--cizgi)",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: 13, opacity: 0.78 }}>Anında Bitirme (Normal)</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: "#22c55e", marginTop: 6 }}>
+                  💎 {sayiFormatla(gerekenTas)} Taş
+                </div>
+                <div style={{ fontSize: 12, opacity: 0.68, marginTop: 6 }}>
+                  {gun} gün {saat} saat {dakika} dk
+                </div>
               </div>
-              <div style={{ fontSize: 13, opacity: 0.68, marginTop: 6 }}>
-                {gun} gün {saat} saat {dakika} dakika için
+
+              <div
+                style={{
+                  padding: 20,
+                  borderRadius: 12,
+                  background: "var(--bg)",
+                  border: "1px solid #f59e0b",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#f59e0b" }}>
+                  👺 Goblin İnşaatçı (40 Taş/Gün)
+                </div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: "var(--vurgu)", marginTop: 6 }}>
+                  💎{" "}
+                  {sayiFormatla(
+                    toplamSaniye <= 0
+                      ? 0
+                      : toplamSaniye <= 21600
+                      ? 10
+                      : Math.max(10, Math.floor(toplamSaniye / 2160))
+                  )}{" "}
+                  Taş
+                </div>
+                <div style={{ fontSize: 12, opacity: 0.75, marginTop: 6 }}>
+                  Bütün taşları tek seferde emmeye hazır 👀
+                </div>
               </div>
             </div>
           </section>
         )}
-
+        
         {/* 4. SÜRE & İNŞAATÇI İKSİRİ HESAPLAYICI */}
         {seciliArac === "sure" && (
           <section
