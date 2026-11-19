@@ -737,7 +737,7 @@ const ORDULAR: Ordu[] = [
   },
 ];
 
-const TH_FILTRELER = ["Tümü", "13", "14", "15", "16", "17"];
+const TH_FILTRELER = ["Tümü", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"];
 const TUR_FILTRELER = ["Tümü", "Yer", "Hava", "Karma"];
 
 export default function Ordular() {
@@ -1376,7 +1376,7 @@ export default function Ordular() {
                 color: "var(--fg)",
               }}
             >
-              {["13", "14", "15", "16", "17"].map((seviye) => (
+              {["6","7","8","9","10","11","12","13", "14", "15", "16", "17","18","19"].map((seviye) => (
                 <option key={seviye} value={seviye}>
                   Belediye Binası {seviye}
                 </option>
@@ -1541,27 +1541,31 @@ export default function Ordular() {
           borderRadius: 14,
         }}
       >
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-          <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.85, marginRight: 4 }}>🏰 Belediye:</span>
-          {TH_FILTRELER.map((f) => (
-            <button
-              key={f}
-              onClick={() => setTh(f)}
-              style={{
-                padding: "7px 12px",
-                borderRadius: 9,
-                border: "1px solid " + (th === f ? "var(--vurgu)" : "var(--cizgi)"),
-                background: th === f ? "var(--vurgu)" : "var(--bg)",
-                color: th === f ? "#111" : "var(--fg)",
-                fontWeight: 700,
-                fontSize: 13,
-                cursor: "pointer",
-                minHeight: 36,
-              }}
-            >
-              {f === "Tümü" ? "Tümü" : "BB " + f}
-            </button>
-          ))}
+<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label htmlFor="ordu-bb-filtre" style={{ fontSize: 13.5, fontWeight: 700, opacity: 0.85 }}>
+            🏰 Belediye:
+          </label>
+          <select
+            id="ordu-bb-filtre"
+            value={th}
+            onChange={(e) => setTh(e.target.value)}
+            style={{
+              padding: "9px 14px",
+              borderRadius: 10,
+              border: "1px solid var(--cizgi)",
+              background: "var(--bg)",
+              color: "var(--fg)",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            {TH_FILTRELER.map((f) => (
+              <option key={f} value={f}>
+                {f === "Tümü" ? "🏰 Tüm BB Seviyeleri" : `🏰 Belediye Binası ${f}`}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>

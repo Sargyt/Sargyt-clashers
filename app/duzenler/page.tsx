@@ -23,8 +23,7 @@ type OySatiri = {
 };
 
 const ADMIN_EPOSTA = "sargytr0@gmail.com";
-const TH_SEVIYELERI = ["13", "14", "15", "16", "17"];
-
+const TH_SEVIYELERI = ["6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"];
 function rastgeleKodUret(): string {
   const karakterler = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let sonuc = "#";
@@ -150,7 +149,7 @@ export default function DuzenlerSayfasi() {
   const [formAcik, setFormAcik] = useState(false);
   const [yeniKod, setYeniKod] = useState("");
   const [yeniBaslik, setYeniBaslik] = useState("");
-  const [yeniTh, setYeniTh] = useState("17");
+  const [yeniTh, setYeniTh] = useState("19");
   const [yeniTur, setYeniTur] = useState<Duzen["tur"]>("Klan Savaşı");
   const [yeniEtiket, setYeniEtiket] = useState("Anti-3 Yıldız");
   const [yeniGorsel, setYeniGorsel] = useState("");
