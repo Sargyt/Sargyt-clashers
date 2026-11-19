@@ -147,9 +147,9 @@ export default function DuzenlerSayfasi() {
   const [uyariMesaji, setUyariMesaji] = useState("");
   const [buyukDuzen, setBuyukDuzen] = useState<Duzen | null>(null);
 
-  // Admin Düzen Ekleme Formu
+// Admin Düzen Ekleme Formu
   const [formAcik, setFormAcik] = useState(false);
-  const [yeniKod, setYeniKod] = useState(rastgeleKodUret);
+  const [yeniKod, setYeniKod] = useState("");
   const [yeniBaslik, setYeniBaslik] = useState("");
   const [yeniTh, setYeniTh] = useState("17");
   const [yeniTur, setYeniTur] = useState<Duzen["tur"]>("Klan Savaşı");
@@ -172,7 +172,8 @@ export default function DuzenlerSayfasi() {
     setYukleniyor(false);
   }
 
-  useEffect(() => {
+useEffect(() => {
+    setYeniKod(rastgeleKodUret());
     supabase.auth.getSession().then(({ data }) => {
       setKullaniciId(data.session?.user?.id ?? null);
       setKullaniciEposta(data.session?.user?.email ?? null);
