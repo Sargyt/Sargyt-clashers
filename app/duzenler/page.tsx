@@ -23,8 +23,7 @@ type OySatiri = {
 };
 
 const ADMIN_EPOSTA = "sargytr0@gmail.com";
-const TH_FILTRELER = ["Tümü", "13", "14", "15", "16", "17"];
-const TUR_FILTRELER = ["Tümü", "Klan Savaşı", "Efsane Ligi", "Ganimet", "Hibrit"];
+const TH_SEVIYELERI = ["13", "14", "15", "16", "17"];
 
 function rastgeleKodUret(): string {
   const karakterler = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -147,7 +146,7 @@ export default function DuzenlerSayfasi() {
   const [uyariMesaji, setUyariMesaji] = useState("");
   const [buyukDuzen, setBuyukDuzen] = useState<Duzen | null>(null);
 
-// Admin Düzen Ekleme Formu
+  // Admin Düzen Ekleme Formu
   const [formAcik, setFormAcik] = useState(false);
   const [yeniKod, setYeniKod] = useState("");
   const [yeniBaslik, setYeniBaslik] = useState("");
@@ -172,7 +171,7 @@ export default function DuzenlerSayfasi() {
     setYukleniyor(false);
   }
 
-useEffect(() => {
+  useEffect(() => {
     setYeniKod(rastgeleKodUret());
     supabase.auth.getSession().then(({ data }) => {
       setKullaniciId(data.session?.user?.id ?? null);
@@ -253,6 +252,7 @@ useEffect(() => {
 
   async function duzenSil(id: string) {
     if (!adminMi) return;
+    if (!confirm("Bu köy düzenini kalıcı olarak silmek istiyor musun?")) return;
     const { error } = await supabase.from("koy_duzenleri").delete().eq("id", id);
     if (!error) {
       setDuzenler((prev) => prev.filter((d) => d.id !== id));
@@ -269,11 +269,9 @@ useEffect(() => {
     const mevcut = oylar.find((o) => o.duzen_id === duzenId && o.user_id === kullaniciId);
 
     if (mevcut && mevcut.oy === secilenOy) {
-      // Aynı oya tekrar basıldıysa oyu geri çek
       setOylar((prev) => prev.filter((o) => !(o.duzen_id === duzenId && o.user_id === kullaniciId)));
       await supabase.from("duzen_oylari").delete().eq("duzen_id", duzenId).eq("user_id", kullaniciId);
     } else if (mevcut) {
-      // Karşı oya basıldıysa oyunu değiştir
       setOylar((prev) =>
         prev.map((o) => (o.duzen_id === duzenId && o.user_id === kullaniciId ? { ...o, oy: secilenOy } : o))
       );
@@ -283,7 +281,6 @@ useEffect(() => {
         .eq("duzen_id", duzenId)
         .eq("user_id", kullaniciId);
     } else {
-      // Yeni oy ekle
       setOylar((prev) => [...prev, { duzen_id: duzenId, user_id: kullaniciId, oy: secilenOy }]);
       await supabase.from("duzen_oylari").insert({ duzen_id: duzenId, user_id: kullaniciId, oy: secilenOy });
     }
@@ -304,6 +301,16 @@ useEffect(() => {
     return oylar.find((o) => o.duzen_id === duzenId && o.user_id === kullaniciId)?.oy ?? 0;
   }
 
+  const filtreAktifMi =
+    thFiltre !== "Tümü" || turFiltre !== "Tümü" || siralama !== "yeni" || arama.trim() !== "";
+
+  function filtreleriSifirla() {
+    setThFiltre("Tümü");
+    setTurFiltre("Tümü");
+    setSiralama("yeni");
+    setArama("");
+  }
+
   const filtrelenmis = duzenler
     .filter((d) => {
       const thUygun = thFiltre === "Tümü" || d.th === Number(thFiltre);
@@ -322,6 +329,17 @@ useEffect(() => {
       return 0;
     });
 
+  const selectStil = {
+    padding: "10px 14px",
+    borderRadius: 10,
+    border: "1px solid var(--cizgi)",
+    background: "var(--bg)",
+    color: "var(--fg)",
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
+  } as const;
+
   return (
     <main style={{ padding: "clamp(20px, 3vw, 34px) clamp(14px, 3vw, 28px)", maxWidth: 1360, width: "100%", margin: "0 auto" }}>
       {/* ÜST BAŞLIK & ADMİN BUTONU */}
@@ -336,8 +354,8 @@ useEffect(() => {
         }}
       >
         <div>
-          <h1 style={{ fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 900, margin: "0 0 6px" }}>
-            🗺️ Köy Düzenleri & Kopyalama Galerisi
+          <h1 style={{ fontSize: "clamp(24px, 4vw, 34px)", fontWeight: 900, margin: "0 0 6px" }}>
+            🗺️ Köy Düzenleri &amp; Kopyalama Galerisi
           </h1>
           <p style={{ opacity: 0.75, margin: 0, fontSize: 15 }}>
             Güncel turnuva ve lig köy düzenlerini incele, tek tıkla oyununa kopyala veya üyeliğinle oy ver.
@@ -437,12 +455,13 @@ useEffect(() => {
             gap: 14,
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-            <strong style={{ fontSize: 18 }}>👑 Sargyt Admin — Yeni Köy Düzeni Yayınla</strong>
-            <span style={{ fontSize: 12.5, opacity: 0.75 }}>
-              Görselleri <code>public/duzenler/</code> klasörüne koyup adını yazabilir veya doğrudan resim linki girebilirsin.
-            </span>
-          </div>
+          <h2 className="baslik-serit" style={{ marginTop: 0, marginBottom: 4 }}>
+            <span>👑 Sargyt Admin — Yeni Köy Düzeni Yayınla</span>
+          </h2>
+
+          <span style={{ fontSize: 12.5, opacity: 0.75, textAlign: "center" }}>
+            Görselleri <code>public/duzenler/</code> klasörüne koyup adını yazabilir veya doğrudan resim linki girebilirsin.
+          </span>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12 }}>
             <div style={{ display: "flex", gap: 6 }}>
@@ -505,7 +524,7 @@ useEffect(() => {
                 color: "var(--fg)",
               }}
             >
-              {["13", "14", "15", "16", "17"].map((s) => (
+              {TH_SEVIYELERI.map((s) => (
                 <option key={s} value={s}>
                   Belediye Binası {s}
                 </option>
@@ -593,122 +612,101 @@ useEffect(() => {
         </form>
       )}
 
-      {/* FİLTRE, KOD ARAMA & SIRALAMA ÇUBUĞU */}
+      {/* SADE TEK SATIR FİLTRE, ARAMA & SIRALAMA BAR */}
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          marginBottom: 20,
-          padding: "16px 20px",
+          padding: 14,
+          marginBottom: 22,
           background: "var(--kart)",
           border: "1px solid var(--cizgi)",
-          borderRadius: 16,
+          borderRadius: 14,
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+          alignItems: "center",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.85, marginRight: 4 }}>🏰 Belediye:</span>
-            {TH_FILTRELER.map((f) => (
-              <button
-                key={f}
-                onClick={() => setThFiltre(f)}
-                style={{
-                  padding: "7px 12px",
-                  borderRadius: 9,
-                  border: "1px solid " + (thFiltre === f ? "var(--vurgu)" : "var(--cizgi)"),
-                  background: thFiltre === f ? "var(--vurgu)" : "var(--bg)",
-                  color: thFiltre === f ? "#111" : "var(--fg)",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  minHeight: 36,
-                }}
-              >
-                {f === "Tümü" ? "Tümü" : "BB " + f}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.85, marginRight: 4 }}>🎯 Tür:</span>
-            {TUR_FILTRELER.map((t) => (
-              <button
-                key={t}
-                onClick={() => setTurFiltre(t)}
-                style={{
-                  padding: "7px 12px",
-                  borderRadius: 9,
-                  border: "1px solid " + (turFiltre === t ? "var(--vurgu)" : "var(--cizgi)"),
-                  background: turFiltre === t ? "var(--vurgu)" : "var(--bg)",
-                  color: turFiltre === t ? "#111" : "var(--fg)",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  minHeight: 36,
-                }}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div
+        <input
+          value={arama}
+          onChange={(e) => setArama(e.target.value)}
+          placeholder="🔍 Düzen kodu (#8X4K9P), başlık veya etiket ara..."
+          aria-label="Düzen ara"
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 10,
-            paddingTop: 10,
-            borderTop: "1px solid var(--cizgi)",
+            flex: "1 1 240px",
+            minWidth: 200,
+            padding: "10px 14px",
+            borderRadius: 10,
+            border: "1px solid var(--cizgi)",
+            background: "var(--bg)",
+            color: "var(--fg)",
+            fontSize: 14,
           }}
+        />
+
+        <select
+          value={thFiltre}
+          onChange={(e) => setThFiltre(e.target.value)}
+          aria-label="Belediye Binası Seviyesi"
+          style={selectStil}
         >
-          <input
-            value={arama}
-            onChange={(e) => setArama(e.target.value)}
-            placeholder="🔍 Düzen kodu (#8X4K9P) veya başlık ara..."
+          <option value="Tümü">🏰 Tüm BB Seviyeleri</option>
+          {TH_SEVIYELERI.map((s) => (
+            <option key={s} value={s}>
+              🏰 Belediye Binası {s}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={turFiltre}
+          onChange={(e) => setTurFiltre(e.target.value)}
+          aria-label="Düzen Türü"
+          style={selectStil}
+        >
+          <option value="Tümü">🎯 Tüm Türler</option>
+          <option value="Klan Savaşı">⚔️ Klan Savaşı</option>
+          <option value="Efsane Ligi">🏆 Efsane Ligi</option>
+          <option value="Ganimet">💰 Ganimet</option>
+          <option value="Hibrit">🛡️ Hibrit</option>
+        </select>
+
+        <select
+          value={siralama}
+          onChange={(e) => setSiralama(e.target.value as "yeni" | "populer" | "kopyalama")}
+          aria-label="Sıralama"
+          style={selectStil}
+        >
+          <option value="yeni">🕒 En Yeniler</option>
+          <option value="populer">🔥 En Yüksek Puan</option>
+          <option value="kopyalama">🎮 En Çok Kopyalanan</option>
+        </select>
+
+        {filtreAktifMi && (
+          <button
+            type="button"
+            onClick={filtreleriSifirla}
             style={{
-              flex: 1,
-              minWidth: 230,
-              padding: "9px 14px",
+              padding: "10px 14px",
+              minHeight: 40,
               borderRadius: 10,
               border: "1px solid var(--cizgi)",
               background: "var(--bg)",
-              color: "var(--fg)",
-              fontSize: 14,
+              color: "var(--vurgu)",
+              fontSize: 13.5,
+              fontWeight: 800,
+              cursor: "pointer",
             }}
-          />
-
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[
-              { id: "yeni", ad: "🕒 En Yeniler" },
-              { id: "populer", ad: "🔥 En Yüksek Puan" },
-              { id: "kopyalama", ad: "🎮 En Çok Kopyalanan" },
-            ].map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setSiralama(s.id as typeof siralama)}
-                style={{
-                  padding: "8px 13px",
-                  borderRadius: 10,
-                  border: "1px solid " + (siralama === s.id ? "var(--vurgu)" : "var(--cizgi)"),
-                  background: siralama === s.id ? "var(--vurgu)" : "var(--bg)",
-                  color: siralama === s.id ? "#111" : "var(--fg)",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  minHeight: 36,
-                }}
-              >
-                {s.ad}
-              </button>
-            ))}
-          </div>
-        </div>
+          >
+            ✕ Sıfırla
+          </button>
+        )}
       </div>
 
       {/* DÜZEN KARTLARI IZGARASI */}
+      <h2 className="baslik-serit" style={{ marginTop: 0 }}>
+        <span>🗺️ Yayınlanan Köy Düzenleri ({filtrelenmis.length})</span>
+      </h2>
+
       {yukleniyor ? (
         <p style={{ opacity: 0.75, textAlign: "center", padding: 32 }}>⏳ Köy düzenleri yükleniyor...</p>
       ) : filtrelenmis.length === 0 ? (

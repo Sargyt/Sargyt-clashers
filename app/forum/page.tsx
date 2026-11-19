@@ -336,6 +336,16 @@ export default function ForumSayfasi() {
     );
   }
 
+  const filtreAktifMi =
+    seciliKategori !== "Tümü" || sirala !== "yeni" || durumFiltre !== "hepsi" || aramaMetni.trim() !== "";
+
+  function filtreleriSifirla() {
+    setSeciliKategori("Tümü");
+    setSirala("yeni");
+    setDurumFiltre("hepsi");
+    setAramaMetni("");
+  }
+
   const filtrelenmis = konular
     .filter((k) => seciliKategori === "Tümü" || k.kategori === seciliKategori)
     .filter((k) => {
@@ -358,6 +368,17 @@ export default function ForumSayfasi() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
+  const selectStil = {
+    padding: "10px 14px",
+    borderRadius: 10,
+    border: "1px solid var(--cizgi)",
+    background: "var(--bg)",
+    color: "var(--fg)",
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
+  } as const;
+
   return (
     <main style={{ padding: "36px 32px", maxWidth: 1360, width: "100%", margin: "0 auto" }}>
       {/* ÜST BAŞLIK & YENİ KONU BUTONU */}
@@ -368,7 +389,7 @@ export default function ForumSayfasi() {
           alignItems: "center",
           flexWrap: "wrap",
           gap: 16,
-          marginBottom: 20,
+          marginBottom: 22,
         }}
       >
         <div>
@@ -394,12 +415,12 @@ export default function ForumSayfasi() {
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button
             type="button"
             onClick={konulariGetir}
             style={{
-              padding: "13px 18px",
+              padding: "12px 18px",
               borderRadius: 12,
               border: "1px solid var(--cizgi)",
               background: "var(--kart)",
@@ -419,12 +440,12 @@ export default function ForumSayfasi() {
               setUyariMesaji("");
             }}
             style={{
-              padding: "13px 24px",
+              padding: "12px 24px",
               borderRadius: 12,
               border: 0,
               background: "var(--vurgu)",
               color: "#111",
-              fontSize: 16,
+              fontSize: 15.5,
               fontWeight: 800,
               cursor: "pointer",
             }}
@@ -441,7 +462,7 @@ export default function ForumSayfasi() {
           style={{
             padding: 24,
             background: "var(--kart)",
-            border: "1px solid var(--vurgu)",
+            border: "1.5px solid var(--vurgu)",
             borderRadius: 16,
             marginBottom: 24,
             display: "flex",
@@ -449,18 +470,19 @@ export default function ForumSayfasi() {
             gap: 14,
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-            <strong style={{ fontSize: 19 }}>Yeni Tartışma Başlat</strong>
-            {!kullaniciEmail && (
-              <span style={{ fontSize: 13, opacity: 0.75 }}>
-                Açtığın konuyu ileride &quot;Çözüldü&quot; olarak kapatabilmek için{" "}
-                <Link href="/giris" style={{ color: "var(--vurgu)" }}>
-                  giriş yapman
-                </Link>{" "}
-                önerilir.
-              </span>
-            )}
-          </div>
+          <h2 className="baslik-serit" style={{ marginTop: 0, marginBottom: 4 }}>
+            <span>✍️ Yeni Tartışma Başlat</span>
+          </h2>
+
+          {!kullaniciEmail && (
+            <span style={{ fontSize: 13, opacity: 0.78, textAlign: "center" }}>
+              Açtığın konuyu ileride &quot;Çözüldü&quot; olarak kapatabilmek için{" "}
+              <Link href="/giris" style={{ color: "var(--vurgu)" }}>
+                giriş yapman
+              </Link>{" "}
+              önerilir.
+            </span>
+          )}
 
           {uyariMesaji && (
             <div
@@ -506,10 +528,10 @@ export default function ForumSayfasi() {
                 fontSize: 15,
               }}
             >
-              <option value="Saldırı Taktikleri">Saldırı Taktikleri</option>
-              <option value="Köy Düzeni">Köy Düzeni</option>
-              <option value="Klan Alımı">Klan Alımı</option>
-              <option value="Soru & Cevap">Soru & Cevap</option>
+              <option value="Saldırı Taktikleri">⚔️ Saldırı Taktikleri</option>
+              <option value="Köy Düzeni">🗺️ Köy Düzeni</option>
+              <option value="Klan Alımı">🛡️ Klan Alımı</option>
+              <option value="Soru & Cevap">❓ Soru &amp; Cevap</option>
             </select>
           </div>
 
@@ -551,110 +573,98 @@ export default function ForumSayfasi() {
         </form>
       )}
 
-      {/* ARAMA, SIRALAMA VE DURUM FİLTRESİ ÇUBUĞU */}
+      {/* SADE TEK SATIR FİLTRE & SIRALAMA BAR */}
       <div
         style={{
-          padding: 16,
+          padding: 14,
           borderRadius: 14,
           background: "var(--kart)",
           border: "1px solid var(--cizgi)",
-          marginBottom: 18,
+          marginBottom: 22,
           display: "flex",
-          flexDirection: "column",
-          gap: 14,
+          gap: 10,
+          flexWrap: "wrap",
+          alignItems: "center",
         }}
       >
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <input
-            value={aramaMetni}
-            onChange={(e) => setAramaMetni(e.target.value)}
-            placeholder="🔍 Konularda veya geçmiş çözümlerde ara..."
+        <input
+          value={aramaMetni}
+          onChange={(e) => setAramaMetni(e.target.value)}
+          placeholder="🔍 Konularda veya çözümlerde ara..."
+          aria-label="Konu ara"
+          style={{
+            flex: "1 1 240px",
+            minWidth: 200,
+            padding: "10px 14px",
+            borderRadius: 10,
+            border: "1px solid var(--cizgi)",
+            background: "var(--bg)",
+            color: "var(--fg)",
+            fontSize: 14,
+          }}
+        />
+
+        <select
+          value={seciliKategori}
+          onChange={(e) => setSeciliKategori(e.target.value as (typeof KATEGORILER)[number])}
+          aria-label="Kategori"
+          style={selectStil}
+        >
+          <option value="Tümü">📂 Tüm Kategoriler</option>
+          <option value="Saldırı Taktikleri">⚔️ Saldırı Taktikleri</option>
+          <option value="Köy Düzeni">🗺️ Köy Düzeni</option>
+          <option value="Klan Alımı">🛡️ Klan Alımı</option>
+          <option value="Soru & Cevap">❓ Soru &amp; Cevap</option>
+        </select>
+
+        <select
+          value={sirala}
+          onChange={(e) => setSirala(e.target.value as "yeni" | "trend" | "yorum")}
+          aria-label="Sıralama"
+          style={selectStil}
+        >
+          <option value="yeni">🆕 En Yeni</option>
+          <option value="trend">🔥 Trend (En Çok Oy)</option>
+          <option value="yorum">💬 En Çok Yorum</option>
+        </select>
+
+        <select
+          value={durumFiltre}
+          onChange={(e) => setDurumFiltre(e.target.value as "hepsi" | "acik" | "cozuldu")}
+          aria-label="Durum"
+          style={selectStil}
+        >
+          <option value="hepsi">📋 Tüm Durumlar</option>
+          <option value="acik">🟢 Açık Tartışmalar</option>
+          <option value="cozuldu">✅ Çözüldü / Arşiv</option>
+        </select>
+
+        {filtreAktifMi && (
+          <button
+            type="button"
+            onClick={filtreleriSifirla}
             style={{
-              flex: 1,
-              minWidth: 240,
               padding: "10px 14px",
+              minHeight: 40,
               borderRadius: 10,
               border: "1px solid var(--cizgi)",
               background: "var(--bg)",
-              color: "var(--fg)",
-              fontSize: 14,
-            }}
-          />
-
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {(
-              [
-                { id: "yeni", ad: "🆕 En Yeni" },
-                { id: "trend", ad: "🔥 Trend (En Çok Oy)" },
-                { id: "yorum", ad: "💬 En Çok Yorum" },
-              ] as const
-            ).map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setSirala(s.id)}
-                style={{
-                  padding: "9px 14px",
-                  borderRadius: 10,
-                  border: sirala === s.id ? "1px solid var(--vurgu)" : "1px solid var(--cizgi)",
-                  background: sirala === s.id ? "var(--vurgu)" : "var(--bg)",
-                  color: sirala === s.id ? "#111" : "var(--fg)",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
-              >
-                {s.ad}
-              </button>
-            ))}
-          </div>
-
-          <select
-            value={durumFiltre}
-            onChange={(e) => setDurumFiltre(e.target.value as "hepsi" | "acik" | "cozuldu")}
-            style={{
-              padding: "9px 12px",
-              borderRadius: 10,
-              border: "1px solid var(--cizgi)",
-              background: "var(--bg)",
-              color: "var(--fg)",
-              fontSize: 13,
-              fontWeight: 700,
+              color: "var(--vurgu)",
+              fontSize: 13.5,
+              fontWeight: 800,
+              cursor: "pointer",
             }}
           >
-            <option value="hepsi">Tüm Konular</option>
-            <option value="acik">🟢 Açık Tartışmalar</option>
-            <option value="cozuldu">✅ Çözüldü / Arşiv</option>
-          </select>
-        </div>
-
-        {/* KATEGORİ FİLTRELERİ */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {KATEGORILER.map((kat) => {
-            const aktif = seciliKategori === kat;
-            return (
-              <button
-                key={kat}
-                onClick={() => setSeciliKategori(kat)}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: 9,
-                  border: aktif ? "1px solid var(--vurgu)" : "1px solid var(--cizgi)",
-                  background: aktif ? "var(--vurgu)" : "var(--bg)",
-                  color: aktif ? "#111" : "var(--fg)",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
-              >
-                {kat}
-              </button>
-            );
-          })}
-        </div>
+            ✕ Sıfırla
+          </button>
+        )}
       </div>
 
       {/* KONU LİSTESİ */}
+      <h2 className="baslik-serit" style={{ marginTop: 0 }}>
+        <span>💬 Tartışmalar ({filtrelenmis.length})</span>
+      </h2>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {yukleniyor ? (
           <div style={{ padding: 32, textAlign: "center", opacity: 0.75 }}>
@@ -754,7 +764,7 @@ export default function ForumSayfasi() {
                                 fontWeight: 800,
                               }}
                             >
-                              ✅ Çözüldü & Kilitli
+                              ✅ Çözüldü &amp; Kilitli
                             </span>
                           )}
                           {(k.oylar ?? 0) >= 5 && (
@@ -924,13 +934,13 @@ export default function ForumSayfasi() {
                             🔒 Bu konu çözüme ulaştığı için kapatılmıştır. Geçmiş cevapları inceleyebilir ancak yeni yorum yazamazsınız.
                           </div>
                         ) : (
-                          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                          <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
                             <input
                               value={yorumMetni}
                               onChange={(e) => setYorumMetni(e.target.value)}
                               placeholder="Bu konuya yanıt yaz..."
                               style={{
-                                flex: 1,
+                                flex: "1 1 220px",
                                 padding: "11px 14px",
                                 borderRadius: 10,
                                 border: "1px solid var(--cizgi)",
