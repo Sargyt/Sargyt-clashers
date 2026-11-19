@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* 1. EJDERHA ATEŞİ (Göz yormayan varsayılan ana tema) */
+/* 1. EJDERHA ATEŞİ (Varsayılan) */
 :root,
 html[data-theme="altin-koyu"] {
   --bg: #12100c;
@@ -11,10 +11,12 @@ html[data-theme="altin-koyu"] {
   --leke-1: rgba(240, 180, 41, 0.20);
   --leke-2: rgba(180, 110, 15, 0.22);
   --leke-3: rgba(255, 205, 80, 0.10);
+  --kontur: #000000;
+  --serit-bg: rgba(240, 180, 41, 0.12);
   color-scheme: dark;
 }
 
-/* 2. HİÇLİK MORU (Orijinal Mor-Siyah) */
+/* 2. HİÇLİK MORU */
 html[data-theme="mor-siyah"] {
   --bg: #0d0a14;
   --fg: #ece8f5;
@@ -24,6 +26,8 @@ html[data-theme="mor-siyah"] {
   --leke-1: rgba(167, 139, 250, 0.24);
   --leke-2: rgba(109, 40, 217, 0.26);
   --leke-3: rgba(196, 181, 253, 0.12);
+  --kontur: #050308;
+  --serit-bg: rgba(167, 139, 250, 0.14);
   color-scheme: dark;
 }
 
@@ -37,6 +41,8 @@ html[data-theme="kanli-ay"] {
   --leke-1: rgba(185, 20, 46, 0.28);
   --leke-2: rgba(120, 10, 30, 0.30);
   --leke-3: rgba(220, 38, 68, 0.14);
+  --kontur: #000000;
+  --serit-bg: rgba(200, 29, 56, 0.15);
   color-scheme: dark;
 }
 
@@ -50,6 +56,8 @@ html[data-theme="zumrut-orman"] {
   --leke-1: rgba(16, 185, 129, 0.22);
   --leke-2: rgba(6, 95, 70, 0.26);
   --leke-3: rgba(52, 211, 153, 0.11);
+  --kontur: #020805;
+  --serit-bg: rgba(16, 185, 129, 0.13);
   color-scheme: dark;
 }
 
@@ -63,10 +71,12 @@ html[data-theme="buzul-efsane"] {
   --leke-1: rgba(56, 189, 248, 0.22);
   --leke-2: rgba(14, 116, 144, 0.24);
   --leke-3: rgba(125, 211, 252, 0.11);
+  --kontur: #02060d;
+  --serit-bg: rgba(56, 189, 248, 0.13);
   color-scheme: dark;
 }
 
-/* 6. KRALİYET PARŞÖMENİ */
+/* 6. KRALİYET PARŞÖMENİ (Açık Tema) */
 html[data-theme="parsomen-acik"] {
   --bg: #f5f2ea;
   --fg: #1b1815;
@@ -76,6 +86,8 @@ html[data-theme="parsomen-acik"] {
   --leke-1: rgba(200, 135, 11, 0.14);
   --leke-2: rgba(180, 110, 10, 0.12);
   --leke-3: rgba(220, 160, 30, 0.08);
+  --kontur: rgba(255, 255, 255, 0.9);
+  --serit-bg: rgba(184, 115, 8, 0.11);
   color-scheme: light;
 }
 
@@ -92,7 +104,7 @@ body {
   position: relative;
   background-color: var(--bg);
   color: var(--fg);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
   min-height: 100vh;
   margin: 0;
 }
@@ -111,6 +123,89 @@ body::before {
     radial-gradient(ellipse 42% 24% at 48% 95%, var(--leke-2) 0%, transparent 65%);
 }
 
+/* ============================================================
+   OYUN TİPOGRAFİSİ & KESKİN KONTUR (STROKE) SİSTEMİ
+============================================================ */
+h1,
+h2,
+.oyun-baslik {
+  font-family: var(--font-baslik), system-ui, sans-serif;
+  letter-spacing: 0.25px;
+  line-height: 1.18;
+  text-shadow:
+    -1.2px -1.2px 0 var(--kontur),
+     1.2px -1.2px 0 var(--kontur),
+    -1.2px  1.2px 0 var(--kontur),
+     1.2px  1.2px 0 var(--kontur),
+     0px    3px   6px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="parsomen-acik"] h1,
+html[data-theme="parsomen-acik"] h2,
+html[data-theme="parsomen-acik"] .oyun-baslik {
+  text-shadow:
+    0 1px 0 var(--kontur),
+    0 2px 5px rgba(80, 50, 10, 0.14);
+}
+
+/* ORTALANMIŞ ARKA PLANLI + ÇİZGİLİ BÖLÜM BAŞLIĞI (BANNER) */
+.baslik-serit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  margin: 4px 0 16px;
+}
+
+.baslik-serit::before,
+.baslik-serit::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--vurgu));
+  opacity: 0.55;
+}
+
+.baslik-serit::after {
+  background: linear-gradient(90deg, var(--vurgu), transparent);
+}
+
+.baslik-serit > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 22px;
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--vurgu) 18%, var(--kart)),
+    var(--kart)
+  );
+  border: 1.5px solid color-mix(in srgb, var(--vurgu) 65%, var(--cizgi));
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: var(--fg);
+  font-family: var(--font-baslik), system-ui, sans-serif;
+  font-size: clamp(16px, 2.2vw, 20px);
+  font-weight: 800;
+  text-align: center;
+  text-shadow:
+    -1.2px -1.2px 0 var(--kontur),
+     1.2px -1.2px 0 var(--kontur),
+    -1.2px  1.2px 0 var(--kontur),
+     1.2px  1.2px 0 var(--kontur),
+     0px    2px   5px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="parsomen-acik"] .baslik-serit > span {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 10px rgba(100, 70, 20, 0.12);
+}
+
 a {
   color: var(--vurgu);
 }
@@ -126,10 +221,6 @@ button {
   min-height: 44px;
 }
 
-h1 {
-  line-height: 1.2;
-}
-
 @media (max-width: 768px) {
   nav {
     padding: 10px 14px !important;
@@ -138,5 +229,8 @@ h1 {
   main {
     padding-left: 14px !important;
     padding-right: 14px !important;
+  }
+  .baslik-serit > span {
+    padding: 7px 14px;
   }
 }

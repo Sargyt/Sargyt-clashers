@@ -348,7 +348,9 @@ export default function KarsilastirSayfasi() {
                 borderRadius: 16,
               }}
             >
-              <h3 style={{ margin: "0 0 16px", fontSize: 20 }}>👑 Kahraman Seviyeleri Karşılaştırması</h3>
+              <h2 className="baslik-serit">
+                <span>👑 Kahraman Seviyeleri Karşılaştırması</span>
+              </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {tumKahramanIsimleri.map((isim) => {
                   const k1 = oyuncu1.kahramanlar.find((k) => k.isim === isim);

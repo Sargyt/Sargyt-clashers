@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Baloo_2, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Menu from "./Menu";
 import Altbilgi from "./Altbilgi";
@@ -14,18 +14,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const baloo2 = Baloo_2({
+  variable: "--font-baslik",
+  subsets: ["latin", "latin-ext"],
+  weight: ["600", "700", "800"],
+});
+
 export const metadata: Metadata = {
   title: "Sargyt Clashers",
-  description: "Clash of Clans köy analizi ve rehber sitesi",
+  description: "Clash of Clans köy analizi, meta ordular, köy düzenleri ve topluluk rehberi",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
       lang="tr"
       data-theme="altin-koyu"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${baloo2.variable} h-full antialiased`}
     >
       <head>
         <script

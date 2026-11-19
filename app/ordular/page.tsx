@@ -1129,8 +1129,8 @@ export default function Ordular() {
 {/* 3. KAHRAMANLAR & GÖRSELLİ EKİPMAN DİZİLİMİ */}
           {seciliOrdu.kahramanlar && seciliOrdu.kahramanlar.length > 0 && (
             <div>
-              <h2 style={{ fontSize: 19, fontWeight: 800, margin: "0 0 14px" }}>
-                👑 Kahramanlar & Kritik Ekipman Dizilimi
+              <h2 className="baslik-serit">
+                <span>👑 Kahramanlar & Kritik Ekipman Dizilimi</span>
               </h2>
               <div
                 style={{
@@ -1266,7 +1266,9 @@ export default function Ordular() {
           {/* 4. ADIM ADIM UYGULAMA PLANI */}
           {seciliOrdu.adimlar && seciliOrdu.adimlar.length > 0 && (
             <div>
-              <h2 style={{ fontSize: 19, fontWeight: 800, margin: "0 0 12px" }}>🎯 Adım Adım Saldırı Planı</h2>
+              <h2 className="baslik-serit">
+                <span>🎯 Adım Adım Saldırı Planı</span>
+              </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {seciliOrdu.adimlar.map((adim, idx) => (
                   <div

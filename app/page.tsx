@@ -817,7 +817,9 @@ export default function Home() {
       {/* HENÜZ KÖY ARANMADIYSA: 2 x 2 GENİŞ HIZLI ERİŞİM KARTLARI */}
       {!oyuncu && !yukleniyor && (
         <section>
-          <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 16px" }}>🚀 Hızlı Erişim & Araçlar</h2>
+         <h2 className="baslik-serit">
+            <span>🚀 Hızlı Erişim & Araçlar</span>
+          </h2>
           <div
             style={{
               display: "grid",

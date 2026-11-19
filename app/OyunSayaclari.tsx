@@ -151,8 +151,10 @@ export default function OyunSayaclari() {
 
   return (
     <section style={{ marginBottom: 28 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-        <h2 style={{ fontSize: 21, fontWeight: 800, margin: 0 }}>⏳ Canlı Oyun Etkinlikleri & Sezon Sayaçları</h2>
+      <div style={{ marginBottom: 16, textAlign: "center" }}>
+        <h2 className="baslik-serit" style={{ marginBottom: 4 }}>
+          <span>⏳ Canlı Oyun Etkinlikleri & Sezon Sayaçları</span>
+        </h2>
         <span style={{ fontSize: 13, opacity: 0.72 }}>Oyun sunucu döngüsüne göre anlık güncellenir</span>
       </div>
 
