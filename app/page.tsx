@@ -12,6 +12,7 @@ type Parca = {
   isim: string;
   seviye: number;
   azami: number;
+  aktif?: boolean;
   aktifEkipmanlar?: { isim: string; seviye: number; azami: number }[];
 };
 
@@ -31,16 +32,129 @@ type Oyuncu = {
   ekipmanlar: Parca[];
 };
 
-type SekmeTipi = "kahramanlar" | "ekipmanlar" | "birlikler" | "buyuler" | "petler" | "super";
+type SekmeTipi = "kahramanlar" | "laboratuvar" | "ekipmanlar" | "petler";
 
-const PETLER = [
-  "L.A.S.S.I", "Mighty Yak", "Electro Owl", "Unicorn", "Phoenix",
-  "Poison Lizard", "Diggy", "Frosty", "Spirit Fox", "Angry Jelly",
-  "Sneezy", "Greedy Raven",
+// KIŞLA AÇILMA ÖNCELİĞİNE GÖRE KESİN SIRALAMA LİSTELERİ
+const IKSIR_BIRLIK_SIRASI = [
+  "Barbarian",
+  "Archer",
+  "Giant",
+  "Goblin",
+  "Wall Breaker",
+  "Balloon",
+  "Wizard",
+  "Healer",
+  "Dragon",
+  "P.E.K.K.A",
+  "Baby Dragon",
+  "Miner",
+  "Electro Dragon",
+  "Yeti",
+  "Dragon Rider",
+  "Electro Titan",
+  "Root Rider",
+  "Thrower",
+  "Meteor Golem",
 ];
-const SUPER_EK = ["Sneaky Goblin", "Rocket Balloon", "Inferno Dragon", "Ice Hound"];
 
-const superMi = (p: Parca) => p.isim.startsWith("Super ") || SUPER_EK.includes(p.isim);
+const KARA_IKSIR_BIRLIK_SIRASI = [
+  "Minion",
+  "Hog Rider",
+  "Valkyrie",
+  "Golem",
+  "Witch",
+  "Lava Hound",
+  "Bowler",
+  "Ice Golem",
+  "Headhunter",
+  "Apprentice Warden",
+  "Druid",
+  "Furnace",
+  "Ruin Witch",
+  "Doom Witch",
+];
+
+const KUSATMA_SIRASI = [
+  "Wall Wrecker",
+  "Battle Blimp",
+  "Stone Slammer",
+  "Siege Barracks",
+  "Log Launcher",
+  "Flame Flinger",
+  "Battle Drill",
+  "Troop Launcher",
+  "Flying Barracks",
+  "Sky Wagon",
+];
+
+const IKSIR_BUYU_SIRASI = [
+  "Lightning Spell",
+  "Healing Spell",
+  "Rage Spell",
+  "Jump Spell",
+  "Freeze Spell",
+  "Clone Spell",
+  "Invisibility Spell",
+  "Recall Spell",
+  "Revive Spell",
+];
+
+const KARA_IKSIR_BUYU_SIRASI = [
+  "Poison Spell",
+  "Earthquake Spell",
+  "Haste Spell",
+  "Skeleton Spell",
+  "Bat Spell",
+  "Overgrowth Spell",
+  "Ice Block Spell",
+];
+
+const PET_SIRASI = [
+  "L.A.S.S.I",
+  "Mighty Yak",
+  "Electro Owl",
+  "Unicorn",
+  "Phoenix",
+  "Poison Lizard",
+  "Diggy",
+  "Frosty",
+  "Spirit Fox",
+  "Angry Jelly",
+  "Sneezy",
+  "Greedy Raven",
+];
+
+const SUPER_SIRASI = [
+  "Super Barbarian",
+  "Super Archer",
+  "Super Giant",
+  "Sneaky Goblin",
+  "Super Wall Breaker",
+  "Rocket Balloon",
+  "Super Wizard",
+  "Super Dragon",
+  "Inferno Dragon",
+  "Super Minion",
+  "Super Valkyrie",
+  "Super Witch",
+  "Ice Hound",
+  "Super Bowler",
+  "Super Miner",
+  "Super Hog Rider",
+  "Super Yeti",
+];
+
+const superMi = (p: Parca) => p.isim.startsWith("Super ") || SUPER_SIRASI.includes(p.isim);
+
+function siralaListe(liste: Parca[], referansSira: string[]): Parca[] {
+  return [...liste].sort((a, b) => {
+    const ia = referansSira.indexOf(a.isim);
+    const ib = referansSira.indexOf(b.isim);
+    const sa = ia === -1 ? 999 : ia;
+    const sb = ib === -1 ? 999 : ib;
+    return sa - sb;
+  });
+}
 
 const VITRIN_KARTLARI = [
   {
@@ -53,7 +167,7 @@ const VITRIN_KARTLARI = [
     href: "/ansiklopedi",
     ikon: "📖",
     baslik: "Kapsamlı Oyun Rehberi",
-    aciklama: "6 Kahraman, 9 Kuşatma Makinesi, birlikler, büyüler ve savunmaların taktik ipuçları.",
+    aciklama: "6 Kahraman, Kuşatma Makineleri, birlikler, büyüler ve savunmaların taktik ipuçları.",
   },
   {
     href: "/klanlar",
@@ -82,8 +196,8 @@ function ProfilBbGorsel({ seviye }: { seviye: number }) {
     return (
       <div
         style={{
-          width: 104,
-          height: 104,
+          width: 96,
+          height: 96,
           borderRadius: 18,
           background: "var(--bg)",
           border: "1px solid var(--cizgi)",
@@ -94,8 +208,8 @@ function ProfilBbGorsel({ seviye }: { seviye: number }) {
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 34 }}>🏰</span>
-        <span style={{ fontSize: 14, fontWeight: 800, color: "var(--vurgu)" }}>BB {seviye}</span>
+        <span style={{ fontSize: 32 }}>🏰</span>
+        <span style={{ fontSize: 13, fontWeight: 800, color: "var(--vurgu)" }}>BB {seviye}</span>
       </div>
     );
   }
@@ -104,8 +218,8 @@ function ProfilBbGorsel({ seviye }: { seviye: number }) {
     <div
       title={`Belediye Binası ${seviye}`}
       style={{
-        width: 108,
-        height: 108,
+        width: 98,
+        height: 98,
         borderRadius: 18,
         background: "var(--bg)",
         border: "1px solid var(--cizgi)",
@@ -119,12 +233,54 @@ function ProfilBbGorsel({ seviye }: { seviye: number }) {
       <img
         src={`/birimler/th${seviye}.png`}
         alt={`Belediye Binası ${seviye}`}
-        width={92}
-        height={92}
+        width={82}
+        height={82}
         onError={() => setHata(true)}
         style={{ objectFit: "contain", display: "block" }}
       />
     </div>
+  );
+}
+
+function BirimIkon({ isim, boyut = 44, yedekIkon = "⚔️" }: { isim: string; boyut?: number; yedekIkon?: string }) {
+  const [hata, setHata] = useState(false);
+
+  if (hata) {
+    return (
+      <div
+        style={{
+          width: boyut,
+          height: boyut,
+          borderRadius: 10,
+          background: "var(--kart)",
+          border: "1px solid var(--cizgi)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: Math.round(boyut * 0.48),
+          flexShrink: 0,
+        }}
+      >
+        {yedekIkon}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={gorselYolu(isim)}
+      alt={tr(isim)}
+      width={boyut}
+      height={boyut}
+      style={{
+        borderRadius: 10,
+        objectFit: "cover",
+        flexShrink: 0,
+        border: "1px solid var(--cizgi)",
+        background: "var(--kart)",
+      }}
+      onError={() => setHata(true)}
+    />
   );
 }
 
@@ -145,22 +301,7 @@ function KahramanKarti({ p }: { p: Parca }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <img
-          src={gorselYolu(p.isim)}
-          alt={tr(p.isim)}
-          width={76}
-          height={76}
-          style={{
-            borderRadius: 14,
-            objectFit: "cover",
-            flexShrink: 0,
-            border: "1px solid var(--cizgi)",
-            background: "var(--kart)",
-          }}
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
+        <BirimIkon isim={p.isim} boyut={72} yedekIkon="👑" />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 4 }}>{tr(p.isim)}</div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700 }}>
@@ -182,7 +323,6 @@ function KahramanKarti({ p }: { p: Parca }) {
         </div>
       </div>
 
-      {/* Aktif Kullanılan Ekipmanlar */}
       <div
         style={{
           borderTop: "1px solid var(--cizgi)",
@@ -208,16 +348,7 @@ function KahramanKarti({ p }: { p: Parca }) {
                   border: "1px solid var(--cizgi)",
                 }}
               >
-                <img
-                  src={gorselYolu(ek.isim)}
-                  alt={tr(ek.isim)}
-                  width={30}
-                  height={30}
-                  style={{ borderRadius: 6, objectFit: "cover", flexShrink: 0 }}
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
+                <BirimIkon isim={ek.isim} boyut={28} yedekIkon="🛡️" />
                 <div style={{ minWidth: 0 }}>
                   <div
                     style={{
@@ -246,49 +377,31 @@ function KahramanKarti({ p }: { p: Parca }) {
 }
 
 function SuperBirlikKarti({ p }: { p: Parca }) {
-  const aktif = p.seviye > 0;
+  const aktif = Boolean(p.aktif);
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
         gap: 14,
-        padding: "14px 16px",
-        background: "var(--bg)",
+        padding: "13px 16px",
+        background: aktif ? "rgba(245, 197, 66, 0.14)" : "var(--bg)",
         border: aktif ? "2px solid #f59e0b" : "1px solid var(--cizgi)",
-        boxShadow: aktif ? "0 0 14px rgba(245, 158, 11, 0.28)" : "none",
+        boxShadow: aktif ? "0 0 14px rgba(245, 158, 11, 0.35)" : "none",
         borderRadius: 14,
         opacity: aktif ? 1 : 0.6,
       }}
     >
-      <img
-        src={gorselYolu(p.isim)}
-        alt={tr(p.isim)}
-        width={48}
-        height={48}
-        style={{
-          borderRadius: 10,
-          objectFit: "cover",
-          flexShrink: 0,
-          border: aktif ? "1px solid #f59e0b" : "1px solid var(--cizgi)",
-        }}
-        onError={(e) => {
-          e.currentTarget.style.display = "none";
-        }}
-      />
+      <BirimIkon isim={p.isim} boyut={46} yedekIkon="✨" />
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 700 }}>{tr(p.isim)}</div>
-        {aktif && (
-          <span
-            style={{
-              display: "inline-block",
-              marginTop: 4,
-              fontSize: 11,
-              fontWeight: 800,
-              color: "#f59e0b",
-            }}
-          >
+        <div style={{ fontSize: 14, fontWeight: 800 }}>{tr(p.isim)}</div>
+        {aktif ? (
+          <span style={{ display: "inline-block", marginTop: 3, fontSize: 12, fontWeight: 800, color: "#f59e0b" }}>
             ★ Şu An Aktif
+          </span>
+        ) : (
+          <span style={{ display: "inline-block", marginTop: 3, fontSize: 12, opacity: 0.65 }}>
+            Pasif
           </span>
         )}
       </div>
@@ -296,7 +409,7 @@ function SuperBirlikKarti({ p }: { p: Parca }) {
   );
 }
 
-function BirimKarti({ p }: { p: Parca }) {
+function BirimKarti({ p, yedekIkon = "⚔️" }: { p: Parca; yedekIkon?: string }) {
   const tamamlandi = p.seviye >= p.azami;
   const oran = Math.min(100, Math.round((p.seviye / p.azami) * 100));
 
@@ -305,33 +418,24 @@ function BirimKarti({ p }: { p: Parca }) {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        padding: "12px 14px",
+        gap: 14,
+        padding: "13px 16px",
         background: "var(--bg)",
         border: `1px solid ${tamamlandi ? "var(--vurgu)" : "var(--cizgi)"}`,
-        borderRadius: 12,
+        borderRadius: 14,
       }}
     >
-      <img
-        src={gorselYolu(p.isim)}
-        alt={tr(p.isim)}
-        width={44}
-        height={44}
-        style={{ borderRadius: 10, objectFit: "cover", flexShrink: 0 }}
-        onError={(e) => {
-          e.currentTarget.style.display = "none";
-        }}
-      />
+      <BirimIkon isim={p.isim} boyut={46} yedekIkon={yedekIkon} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 14, fontWeight: 700, gap: 8 }}>
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {tr(p.isim)}
           </span>
-          <span style={{ opacity: 0.85, marginLeft: 6 }}>
+          <span style={{ opacity: 0.9, flexShrink: 0, color: tamamlandi ? "#22c55e" : "inherit" }}>
             {p.seviye}/{p.azami}
           </span>
         </div>
-        <div style={{ height: 6, background: "var(--cizgi)", borderRadius: 6, overflow: "hidden", marginTop: 7 }}>
+        <div style={{ height: 6, background: "var(--cizgi)", borderRadius: 6, overflow: "hidden", marginTop: 8 }}>
           <div
             style={{
               height: "100%",
@@ -342,6 +446,96 @@ function BirimKarti({ p }: { p: Parca }) {
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+function GenisKategoriBolumu({
+  baslik,
+  aciklama,
+  liste,
+  superMod = false,
+  yedekIkon = "⚔️",
+  bosGoster = false,
+  bosMesaj = "Bu kategori yakında eklenecek birlikler için ayrılmıştır.",
+}: {
+  baslik: string;
+  aciklama?: string;
+  liste: Parca[];
+  superMod?: boolean;
+  yedekIkon?: string;
+  bosGoster?: boolean;
+  bosMesaj?: string;
+}) {
+  if (liste.length === 0 && !bosGoster) return null;
+  return (
+    <div
+      style={{
+        padding: 20,
+        borderRadius: 16,
+        background: "var(--kart)",
+        border: "1px solid var(--cizgi)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+        <div>
+          <h4 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>
+            {baslik} {liste.length > 0 ? `(${liste.length})` : ""}
+          </h4>
+          {aciklama && (
+            <p style={{ margin: "4px 0 0", fontSize: 13, opacity: 0.72 }}>{aciklama}</p>
+          )}
+        </div>
+        {!superMod && liste.length > 0 && (
+          <span
+            style={{
+              padding: "5px 12px",
+              borderRadius: 10,
+              background: "var(--bg)",
+              border: "1px solid var(--cizgi)",
+              fontSize: 14,
+              fontWeight: 800,
+              color: "var(--vurgu)",
+            }}
+          >
+            İlerleme: %{yuzde(liste)}
+          </span>
+        )}
+      </div>
+
+      {liste.length === 0 ? (
+        <div
+          style={{
+            padding: "16px 18px",
+            borderRadius: 12,
+            background: "var(--bg)",
+            border: "1px dashed var(--cizgi)",
+            fontSize: 13,
+            opacity: 0.75,
+          }}
+        >
+          {bosMesaj}
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+            gap: 12,
+          }}
+        >
+          {liste.map((p) =>
+            superMod ? (
+              <SuperBirlikKarti key={p.isim} p={p} />
+            ) : (
+              <BirimKarti key={p.isim} p={p} yedekIkon={yedekIkon} />
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -362,6 +556,7 @@ export default function Home() {
         .from("favoriler")
         .insert({ kod: o.kod, isim: o.isim.slice(0, 40) });
       if (error) {
+        setFavoriEklendi(true);
         setFavoriMesaj(error.code === "23505" ? "Zaten favorilerinde kayıtlı." : "Kaydedilemedi.");
       } else {
         setFavoriEklendi(true);
@@ -373,6 +568,7 @@ export default function Home() {
       const eski = JSON.parse(localStorage.getItem("favoriler") || "[]");
       const liste: { kod: string; isim: string }[] = Array.isArray(eski) ? eski : [];
       if (liste.some((f) => f.kod === o.kod)) {
+        setFavoriEklendi(true);
         setFavoriMesaj("Zaten favorilerinde kayıtlı.");
         return;
       }
@@ -385,7 +581,7 @@ export default function Home() {
     }
   }
 
-  function veriyiIsle(veri: Oyuncu) {
+  async function veriyiIsle(veri: Oyuncu) {
     setOyuncu({
       ...veri,
       kahramanlar: veri.kahramanlar.map((k: Parca) => ({
@@ -402,6 +598,27 @@ export default function Home() {
       })),
     });
     setAktifSekme("kahramanlar");
+
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      const { data: satir } = await supabase
+        .from("favoriler")
+        .select("kod")
+        .eq("kod", veri.kod)
+        .maybeSingle();
+      if (satir) {
+        setFavoriEklendi(true);
+        setFavoriMesaj("Bu köy favorilerinde kayıtlı.");
+      }
+    } else {
+      try {
+        const eski = JSON.parse(localStorage.getItem("favoriler") || "[]");
+        if (Array.isArray(eski) && eski.some((f: { kod: string }) => f.kod === veri.kod)) {
+          setFavoriEklendi(true);
+          setFavoriMesaj("Bu köy favorilerinde kayıtlı.");
+        }
+      } catch {}
+    }
   }
 
   async function ara(e: FormEvent) {
@@ -422,7 +639,7 @@ export default function Home() {
       if (!yanit.ok) {
         setHata(veri.hata ?? "Bir sorun oluştu");
       } else {
-        veriyiIsle(veri);
+        await veriyiIsle(veri);
       }
     } catch {
       setHata("Bağlantı hatası, tekrar dene.");
@@ -445,7 +662,7 @@ export default function Home() {
             if (!yanit.ok) {
               setHata(veri.hata ?? "Bir sorun oluştu");
             } else {
-              veriyiIsle(veri);
+              await veriyiIsle(veri);
             }
           })
           .catch(() => setHata("Bağlantı hatası, tekrar dene."))
@@ -454,11 +671,71 @@ export default function Home() {
     }
   }, []);
 
-  const normal = oyuncu ? oyuncu.birlikler.filter((p) => !superMi(p) && !PETLER.includes(p.isim)) : [];
-  const petler = oyuncu ? oyuncu.birlikler.filter((p) => PETLER.includes(p.isim)) : [];
-  const supers = oyuncu ? oyuncu.birlikler.filter(superMi) : [];
+  // Kışla açılma önceliğine ve türüne göre kesin ayrım
+  const iksirBirlikleri = oyuncu
+    ? siralaListe(
+        oyuncu.birlikler.filter((p) => IKSIR_BIRLIK_SIRASI.includes(p.isim)),
+        IKSIR_BIRLIK_SIRASI
+      )
+    : [];
+
+  const karaIksirBirlikleri = oyuncu
+    ? siralaListe(
+        oyuncu.birlikler.filter((p) => KARA_IKSIR_BIRLIK_SIRASI.includes(p.isim)),
+        KARA_IKSIR_BIRLIK_SIRASI
+      )
+    : [];
+
+  const kusatmalar = oyuncu
+    ? siralaListe(
+        oyuncu.birlikler.filter((p) => KUSATMA_SIRASI.includes(p.isim)),
+        KUSATMA_SIRASI
+      )
+    : [];
+
+  const petler = oyuncu
+    ? siralaListe(
+        oyuncu.birlikler.filter((p) => PET_SIRASI.includes(p.isim)),
+        PET_SIRASI
+      )
+    : [];
+
+  const supers = oyuncu
+    ? siralaListe(
+        oyuncu.birlikler.filter(superMi),
+        SUPER_SIRASI
+      )
+    : [];
+
+  // Takım Kışlası / özel birlikler (şu an boş veya yeni gelen birlikler)
+  // YENİ HALİ:
+  const takimKislasiBirlikleri: Parca[] = [];
+
+  const iksirBuyuleri = oyuncu
+    ? siralaListe(
+        oyuncu.buyuler.filter((s) => !KARA_IKSIR_BUYU_SIRASI.includes(s.isim)),
+        IKSIR_BUYU_SIRASI
+      )
+    : [];
+
+  const karaIksirBuyuleri = oyuncu
+    ? siralaListe(
+        oyuncu.buyuler.filter((s) => KARA_IKSIR_BUYU_SIRASI.includes(s.isim)),
+        KARA_IKSIR_BUYU_SIRASI
+      )
+    : [];
+
+  const laboratuvarHepsi = [
+    ...iksirBirlikleri,
+    ...karaIksirBirlikleri,
+    ...takimKislasiBirlikleri,
+    ...iksirBuyuleri,
+    ...karaIksirBuyuleri,
+    ...kusatmalar,
+  ];
+
   const hepsi = oyuncu
-    ? [...oyuncu.kahramanlar, ...oyuncu.ekipmanlar, ...normal, ...petler, ...oyuncu.buyuler]
+    ? [...oyuncu.kahramanlar, ...oyuncu.ekipmanlar, ...laboratuvarHepsi, ...petler]
     : [];
 
   const enCokEksikler = hepsi
@@ -466,34 +743,28 @@ export default function Home() {
     .sort((a, b) => b.azami - b.seviye - (a.azami - a.seviye))
     .slice(0, 5);
 
-  const sekmeler: { id: SekmeTipi; etiket: string; liste: Parca[] }[] = oyuncu
-    ? [
-        { id: "kahramanlar", etiket: `👑 Kahramanlar (${oyuncu.kahramanlar.length})`, liste: oyuncu.kahramanlar },
-        { id: "birlikler", etiket: `⚔️ Birlikler (${normal.length})`, liste: normal },
-        { id: "buyuler", etiket: `⚡ Büyüler (${oyuncu.buyuler.length})`, liste: oyuncu.buyuler },
-        { id: "ekipmanlar", etiket: `🛡️ Ekipmanlar (${oyuncu.ekipmanlar.length})`, liste: oyuncu.ekipmanlar },
-        { id: "petler", etiket: `🐾 Hayvanlar (${petler.length})`, liste: petler },
-        ...(supers.length > 0 ? [{ id: "super" as SekmeTipi, etiket: `✨ Süper Birlikler (${supers.length})`, liste: supers }] : []),
-      ]
-    : [];
-
-  const seciliSekmeVerisi = sekmeler.find((s) => s.id === aktifSekme) ?? sekmeler[0];
+  const sekmeler: { id: SekmeTipi; etiket: string }[] = [
+    { id: "kahramanlar", etiket: `👑 Kahramanlar (${oyuncu?.kahramanlar.length ?? 0})` },
+    { id: "laboratuvar", etiket: `🧪 Laboratuvar & Ordu Merkezi (${laboratuvarHepsi.length})` },
+    { id: "ekipmanlar", etiket: `🛡️ Ekipmanlar (${oyuncu?.ekipmanlar.length ?? 0})` },
+    { id: "petler", etiket: `🐾 Hayvanlar (${petler.length})` },
+  ];
 
   return (
-    <main style={{ padding: "36px 32px", maxWidth: 1360, width: "100%", margin: "0 auto" }}>
+    <main style={{ padding: "32px 24px", maxWidth: 1360, width: "100%", margin: "0 auto" }}>
       {/* ÜST ARAMA BÖLÜMÜ */}
       <section
         style={{
-          padding: "28px 32px",
+          padding: "24px 28px",
           background: "var(--kart)",
           border: "1px solid var(--cizgi)",
           borderRadius: 18,
-          marginBottom: 28,
+          marginBottom: 24,
         }}
       >
-        <h1 style={{ fontSize: 34, fontWeight: 900, margin: "0 0 8px" }}>Köyünü Analiz Et</h1>
-        <p style={{ opacity: 0.75, margin: "0 0 20px", fontSize: 16 }}>
-          Köy kodunu gir; kahramanlarını, aktif ekipmanlarını, birlik seviyelerini ve öncelikli eksiklerini tam ekran incele.
+        <h1 style={{ fontSize: 32, fontWeight: 900, margin: "0 0 8px" }}>Köyünü Analiz Et</h1>
+        <p style={{ opacity: 0.75, margin: "0 0 18px", fontSize: 15 }}>
+          Köy kodunu gir; kahramanlarını, aktif ekipmanlarını, kışla açılma sırasına göre birlik & büyü seviyelerini incele.
         </p>
 
         <form onSubmit={ara} style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -505,8 +776,8 @@ export default function Home() {
             aria-label="Köy kodu"
             style={{
               flex: 1,
-              minWidth: 240,
-              padding: "14px 18px",
+              minWidth: 220,
+              padding: "13px 16px",
               borderRadius: 12,
               border: "1px solid var(--cizgi)",
               background: "var(--bg)",
@@ -517,7 +788,7 @@ export default function Home() {
           <button
             disabled={yukleniyor}
             style={{
-              padding: "14px 32px",
+              padding: "13px 28px",
               borderRadius: 12,
               border: 0,
               background: "var(--vurgu)",
@@ -541,7 +812,7 @@ export default function Home() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
               gap: 18,
             }}
           >
@@ -572,58 +843,55 @@ export default function Home() {
 
       {/* KÖY ANALİZ SONUÇLARI */}
       {oyuncu && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          {/* ÜST KISIM: 2 Sütunlu Zengin Profil Kartı ve Genel İlerleme Özeti */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+          {/* ÜST KISIM: Ferah Profil Kartı ve Genel İlerleme Özeti */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
               gap: 20,
             }}
           >
-            {/* Sol Kart: Oyuncu Profil Kartı */}
             <section
               style={{
-                padding: "26px 28px",
+                padding: "22px 24px",
                 background: "var(--kart)",
                 border: "1px solid var(--cizgi)",
                 borderRadius: 16,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
-                gap: 14,
+                gap: 12,
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: 0 }}>
-                  {/* Büyük Belediye Binası Görseli */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0, flex: 1 }}>
                   <ProfilBbGorsel seviye={oyuncu.thSeviyesi} />
 
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-                      <h2 style={{ margin: 0, fontSize: 30, fontWeight: 900, lineHeight: 1.15 }}>{oyuncu.isim}</h2>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                      <h2 style={{ margin: 0, fontSize: 26, fontWeight: 900, lineHeight: 1.15 }}>{oyuncu.isim}</h2>
                       <span
                         style={{
-                          padding: "6px 14px",
-                          borderRadius: 10,
+                          padding: "4px 11px",
+                          borderRadius: 9,
                           background: "var(--vurgu)",
                           color: "#111",
                           fontWeight: 800,
-                          fontSize: 15,
+                          fontSize: 13,
                         }}
                       >
                         Belediye {oyuncu.thSeviyesi}
                       </span>
                     </div>
 
-                    {/* Güncel Lig İkonu + Kupa Bilgisi */}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 9,
-                        margin: "10px 0 0",
-                        fontSize: 16,
+                        gap: 8,
+                        margin: "8px 0 0",
+                        fontSize: 14,
                         opacity: 0.9,
                         flexWrap: "wrap",
                       }}
@@ -634,8 +902,8 @@ export default function Home() {
                         <img
                           src={oyuncu.ligIkon}
                           alt={oyuncu.lig ?? "Lig"}
-                          width={34}
-                          height={34}
+                          width={28}
+                          height={28}
                           style={{ objectFit: "contain", flexShrink: 0 }}
                         />
                       )}
@@ -644,14 +912,13 @@ export default function Home() {
                       </span>
                     </div>
 
-                    {/* Klan Flaması (Rozeti) + Klan Linki */}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 10,
-                        margin: "10px 0 0",
-                        fontSize: 17,
+                        gap: 8,
+                        margin: "8px 0 0",
+                        fontSize: 15,
                         fontWeight: 700,
                       }}
                     >
@@ -659,19 +926,18 @@ export default function Home() {
                         <img
                           src={oyuncu.klanRozet}
                           alt={oyuncu.klan ?? "Klan"}
-                          width={34}
-                          height={34}
+                          width={28}
+                          height={28}
                           style={{ objectFit: "contain", flexShrink: 0 }}
                         />
                       ) : (
-                        <span style={{ fontSize: 22 }}>🛡️</span>
+                        <span style={{ fontSize: 19 }}>🛡️</span>
                       )}
 
                       {oyuncu.klan && oyuncu.klanKod ? (
                         <Link
                           href={"/klanlar?kod=" + oyuncu.klanKod.replace(/^#/, "")}
                           style={{ color: "var(--vurgu)", textDecoration: "none", fontWeight: 800 }}
-                          title="Bu klanın analizini ve üyelerini gör"
                         >
                           {oyuncu.klan} ↗
                         </Link>
@@ -684,57 +950,54 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Yıldız Favori İkon Butonu */}
                 <button
                   onClick={() => favoriyeEkle(oyuncu)}
-                  title="Favorilere ekle"
+                  title={favoriEklendi ? "Favorilerinde kayıtlı" : "Favorilere ekle"}
                   style={{
-                    padding: "12px 16px",
+                    padding: "10px 14px",
                     borderRadius: 12,
-                    border: favoriEklendi ? "1px solid #f59e0b" : "1px solid var(--cizgi)",
-                    background: favoriEklendi ? "rgba(245, 158, 11, 0.15)" : "var(--bg)",
-                    color: favoriEklendi ? "#f59e0b" : "var(--fg)",
+                    border: favoriEklendi ? "1px solid var(--vurgu)" : "1px solid var(--cizgi)",
+                    background: favoriEklendi ? "rgba(245, 197, 66, 0.15)" : "var(--bg)",
+                    color: favoriEklendi ? "var(--vurgu)" : "var(--fg)",
                     cursor: "pointer",
-                    fontSize: 19,
+                    fontSize: 16,
                     fontWeight: 700,
                     display: "flex",
                     alignItems: "center",
                     gap: 6,
                     flexShrink: 0,
-                    alignSelf: "flex-start",
                   }}
                 >
                   <span>{favoriEklendi ? "★" : "☆"}</span>
-                  <span style={{ fontSize: 14 }}>{favoriEklendi ? "Favoride" : "Favori"}</span>
+                  <span style={{ fontSize: 13 }}>{favoriEklendi ? "Favoride" : "Favori"}</span>
                 </button>
               </div>
 
               {favoriMesaj && (
-                <p style={{ margin: 0, fontSize: 13, color: "var(--vurgu)", fontWeight: 600 }}>{favoriMesaj}</p>
+                <p style={{ margin: 0, fontSize: 12, color: "var(--vurgu)", fontWeight: 600 }}>{favoriMesaj}</p>
               )}
             </section>
 
-            {/* Sağ Kart: Genel İlerleme ve Öncelikli Eksikler */}
             <section
               style={{
-                padding: 24,
+                padding: "22px 24px",
                 background: "var(--kart)",
                 border: "1px solid var(--cizgi)",
                 borderRadius: 16,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                gap: 16,
+                gap: 14,
               }}
             >
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <strong style={{ fontSize: 17 }}>Genel Köy Tamamlanması (BB {oyuncu.thSeviyesi})</strong>
-                  <strong style={{ fontSize: 24, color: "var(--vurgu)" }}>%{yuzde(hepsi)}</strong>
+                  <strong style={{ fontSize: 16 }}>Genel Köy Tamamlanması (BB {oyuncu.thSeviyesi})</strong>
+                  <strong style={{ fontSize: 22, color: "var(--vurgu)" }}>%{yuzde(hepsi)}</strong>
                 </div>
                 <div
                   style={{
-                    height: 12,
+                    height: 10,
                     background: "var(--cizgi)",
                     borderRadius: 10,
                     overflow: "hidden",
@@ -753,17 +1016,17 @@ export default function Home() {
               </div>
 
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, opacity: 0.85, marginBottom: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, opacity: 0.85, marginBottom: 8 }}>
                   {enCokEksikler.length > 0 ? "⚡ Öncelikli Yükseltmeler:" : "🎉 Bu Belediye Binası tamamen dolu!"}
                 </div>
                 {enCokEksikler.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
                     {enCokEksikler.map((p) => (
                       <span
                         key={p.isim}
                         style={{
-                          fontSize: 13,
-                          padding: "5px 10px",
+                          fontSize: 12,
+                          padding: "4px 9px",
                           borderRadius: 8,
                           background: "var(--bg)",
                           border: "1px solid var(--cizgi)",
@@ -796,11 +1059,11 @@ export default function Home() {
                 flexWrap: "wrap",
                 borderBottom: "1px solid var(--cizgi)",
                 paddingBottom: 16,
-                marginBottom: 20,
+                marginBottom: 22,
               }}
             >
               {sekmeler.map((sekme) => {
-                const secili = sekme.id === seciliSekmeVerisi?.id;
+                const secili = sekme.id === aktifSekme;
                 return (
                   <button
                     key={sekme.id}
@@ -814,7 +1077,6 @@ export default function Home() {
                       fontWeight: secili ? 800 : 600,
                       fontSize: 14,
                       cursor: "pointer",
-                      transition: "all 0.15s ease",
                     }}
                   >
                     {sekme.etiket}
@@ -823,67 +1085,142 @@ export default function Home() {
               })}
             </div>
 
-            {/* Seçili Sekmenin İçeriği */}
-            {seciliSekmeVerisi && (
+            {/* 1. SEKME: KAHRAMANLAR */}
+            {aktifSekme === "kahramanlar" && (
               <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>👑 Kahramanlar & Aktif Ekipmanlar</h3>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--vurgu)" }}>
+                    İlerleme: %{yuzde(oyuncu.kahramanlar)}
+                  </span>
+                </div>
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 16,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                    gap: 16,
                   }}
                 >
-                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>{seciliSekmeVerisi.etiket}</h3>
-                  {seciliSekmeVerisi.id !== "super" && (
-                    <span style={{ fontSize: 15, fontWeight: 800, color: "var(--vurgu)" }}>
-                      Kategori İlerlemesi: %{yuzde(seciliSekmeVerisi.liste)}
-                    </span>
-                  )}
+                  {oyuncu.kahramanlar.map((p) => (
+                    <KahramanKarti key={p.isim} p={p} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 2. SEKME: LABORATUVAR & ORDU MERKEZİ (TAM GENİŞLİKTE ALT ALTA KATEGORİLER) */}
+            {aktifSekme === "laboratuvar" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>🧪 Laboratuvar & Ordu Merkezi</h3>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--vurgu)" }}>
+                    Genel Laboratuvar İlerlemesi: %{yuzde(laboratuvarHepsi)}
+                  </span>
                 </div>
 
-                {seciliSekmeVerisi.id === "super" && (
-                  <p style={{ opacity: 0.75, fontSize: 14, marginTop: 0, marginBottom: 16 }}>
-                    Altın çerçeveli birlikler oyuncunun şu an aktif olarak kullandığı Süper Birlikleri gösterir.
-                  </p>
-                )}
+                {/* Tam Genişlikte Alt Alta Kategoriler */}
+                <GenisKategoriBolumu
+                  baslik="💧 İksir Birlikleri"
+                  aciklama="Kışlada açılma sırasına göre dizilmiştir"
+                  liste={iksirBirlikleri}
+                  yedekIkon="💧"
+                />
 
-                {seciliSekmeVerisi.liste.length === 0 ? (
-                  <p style={{ opacity: 0.7, fontSize: 15 }}>Bu kategoride henüz açık birim bulunmuyor.</p>
-                ) : seciliSekmeVerisi.id === "kahramanlar" ? (
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(310px, 1fr))",
-                      gap: 16,
-                    }}
-                  >
-                    {seciliSekmeVerisi.liste.map((p) => (
-                      <KahramanKarti key={p.isim} p={p} />
-                    ))}
-                  </div>
-                ) : seciliSekmeVerisi.id === "super" ? (
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                      gap: 14,
-                    }}
-                  >
-                    {seciliSekmeVerisi.liste.map((p) => (
-                      <SuperBirlikKarti key={p.isim} p={p} />
-                    ))}
-                  </div>
+                <GenisKategoriBolumu
+                  baslik="🛢️ Kara İksir Birlikleri"
+                  aciklama="Kara Kışlada açılma sırasına göre dizilmiştir"
+                  liste={karaIksirBirlikleri}
+                  yedekIkon="🛢️"
+                />
+
+                {/* Takım Kışlası — Birliklerin hemen altında, şimdilik boş yer tutucu olarak hazır */}
+                <GenisKategoriBolumu
+                  baslik="🪖 Takım Kışlası"
+                  aciklama="Takım Kışlası birimleri bu bölümde yer alacaktır"
+                  liste={takimKislasiBirlikleri}
+                  yedekIkon="🪖"
+                  bosGoster
+                  bosMesaj="Takım Kışlası birimleri henüz listelenmedi — çok yakında burada görünecek."
+                />
+
+                <GenisKategoriBolumu
+                  baslik="✨ Süper Birlikler"
+                  aciklama="Vurgulu çerçeveli kartlar oyuncunun şu an aktif olarak kullandığı Süper Birlikleri gösterir"
+                  liste={supers}
+                  superMod
+                />
+
+                <GenisKategoriBolumu
+                  baslik="⚡ İksir Büyüleri"
+                  aciklama="Büyü Fabrikasında açılma sırasına göre dizilmiştir"
+                  liste={iksirBuyuleri}
+                  yedekIkon="⚡"
+                />
+
+                <GenisKategoriBolumu
+                  baslik="🌑 Kara İksir Büyüleri"
+                  aciklama="Kara Büyü Fabrikasında açılma sırasına göre dizilmiştir"
+                  liste={karaIksirBuyuleri}
+                  yedekIkon="🌑"
+                />
+
+                <GenisKategoriBolumu
+                  baslik="🚜 Kuşatma Makineleri"
+                  aciklama="Atölyede açılma sırasına göre dizilmiştir"
+                  liste={kusatmalar}
+                  yedekIkon="🚜"
+                />
+              </div>
+            )}
+
+            {/* 3. SEKME: EKİPMANLAR */}
+            {aktifSekme === "ekipmanlar" && (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>🛡️ Kahraman Ekipmanları</h3>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--vurgu)" }}>
+                    İlerleme: %{yuzde(oyuncu.ekipmanlar)}
+                  </span>
+                </div>
+                {oyuncu.ekipmanlar.length === 0 ? (
+                  <p style={{ opacity: 0.7 }}>Bu köyde henüz açık ekipman bulunmuyor.</p>
                 ) : (
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
                       gap: 12,
                     }}
                   >
-                    {seciliSekmeVerisi.liste.map((p) => (
-                      <BirimKarti key={p.isim} p={p} />
+                    {oyuncu.ekipmanlar.map((p) => (
+                      <BirimKarti key={p.isim} p={p} yedekIkon="🛡️" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 4. SEKME: HAYVANLAR */}
+            {aktifSekme === "petler" && (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>🐾 Kahraman Hayvanları</h3>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--vurgu)" }}>
+                    İlerleme: %{yuzde(petler)}
+                  </span>
+                </div>
+                {petler.length === 0 ? (
+                  <p style={{ opacity: 0.7 }}>Bu köyde henüz açık kahraman hayvanı bulunmuyor.</p>
+                ) : (
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+                      gap: 12,
+                    }}
+                  >
+                    {petler.map((p) => (
+                      <BirimKarti key={p.isim} p={p} yedekIkon="🐾" />
                     ))}
                   </div>
                 )}

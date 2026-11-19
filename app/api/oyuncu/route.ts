@@ -7,6 +7,7 @@ type Parca = {
   level: number;
   maxLevel: number;
   village?: string;
+  superTroopIsActive?: boolean;
   equipment?: { name: string; level: number; maxLevel: number }[];
 };
 
@@ -17,6 +18,7 @@ function ana(liste: Parca[] | undefined) {
       isim: p.name,
       seviye: p.level,
       azami: p.maxLevel,
+      aktif: Boolean(p.superTroopIsActive),
       aktifEkipmanlar: (p.equipment ?? []).map((e) => ({
         isim: e.name,
         seviye: e.level,

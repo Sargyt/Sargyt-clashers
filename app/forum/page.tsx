@@ -5,14 +5,14 @@ import { supabase } from "../supabase";
 
 const ADMIN_EPOSTALAR = ["sargytr0@gmail.com"];
 
-const YASAKLI_KELIMELER = [
-  "hesap satilik", "hesap satılık", "hesap satiyorum", "hesap satıyorum",
-  "koy satilik", "köy satılık", "hesap takas", "koy takas", "köy takas",
+const YASAKLI_KOKLER = [
+  "hesap sat", "koy sat", "köy sat", "hesabi sat", "hesabı sat",
+  "hesap takas", "koy takas", "köy takas", "takaslik", "takaslık",
   "bedava tas", "bedava taş", "ucretsiz tas", "ücretsiz taş",
-  "gem hilesi", "tas hilesi", "taş hilesi", "elmas hilesi",
-  "mod apk", "hile apk", "bot indir", "oto saldiri bot",
+  "gem hile", "tas hile", "taş hile", "elmas hile",
+  "mod apk", "hile apk", "bot indir", "oto saldiri",
   "amk", "aq", "orospu", "pic", "piç", "yarrak", "yarak", "sikik", "siktir",
-  "sikeyim", "götveren", "gotveren", "ibne", "pezevenk", "kahpe", "oc", "oç",
+  "sikeyim", "götveren", "gotveren", "ibne", "pezevenk", "kahpe", "oç",
 ];
 
 function metinKontrolEt(hamMetin: string): string | null {
@@ -24,10 +24,11 @@ function metinKontrolEt(hamMetin: string): string | null {
     .replace(/ş/g, "s")
     .replace(/ö/g, "o")
     .replace(/ç/g, "c")
-    .replace(/[.,\-_*!?@#$%^&()+=]/g, " ");
+    .replace(/[.,\-_*!?@#$%^&()+=]/g, " ")
+    .replace(/\s+/g, " ");
 
-  for (const yasak of YASAKLI_KELIMELER) {
-    const normYasak = yasak
+  for (const kok of YASAKLI_KOKLER) {
+    const normKok = kok
       .toLowerCase()
       .replace(/ı/g, "i")
       .replace(/ğ/g, "g")
@@ -36,9 +37,13 @@ function metinKontrolEt(hamMetin: string): string | null {
       .replace(/ö/g, "o")
       .replace(/ç/g, "c");
 
-    const regex = new RegExp(`(^|\\s)${normYasak}(\\s|$)`, "i");
-    if (regex.test(temiz) || (normYasak.length >= 5 && temiz.includes(normYasak))) {
-      return "Paylaşımınız topluluk kurallarına veya Supercell Hizmet Şartları'na aykırı ifadeler içerdiği için engellendi.";
+    if (normKok.length <= 3) {
+      const regex = new RegExp(`(^|\\s)${normKok}(\\s|$)`, "i");
+      if (regex.test(temiz)) {
+        return "Paylaşımınız topluluk kurallarına veya Supercell Hizmet Şartları'na aykırı ifadeler içerdiği için engellendi.";
+      }
+    } else if (temiz.includes(normKok)) {
+      return "Paylaşımınız topluluk kurallarına veya Supercell Hizmet Şartları'na (hesap satışı/takası, hile, hakaret vb.) aykırı ifadeler içerdiği için engellendi.";
     }
   }
   return null;
@@ -276,26 +281,43 @@ export default function ForumSayfasi() {
     setYorumGonderiliyor(false);
   }
 
-  async function konuSil(konuId: string) {
+async function konuSil(konuId: string) {
     if (!adminMi) return;
     if (!confirm("Bu konuyu ve altındaki tüm yorumları kalıcı olarak silmek istiyor musun?")) return;
 
-    const { error } = await supabase.from("forum_konular").delete().eq("id", konuId);
-    if (!error) {
-      setKonular((prev) => prev.filter((k) => k.id !== konuId));
+    const { data, error } = await supabase
+      .from("forum_konular")
+      .delete()
+      .eq("id", konuId)
+      .select();
+
+    if (error || !data || data.length === 0) {
+      alert("Veritabanından silinemedi! Supabase SQL Editor'de admin delete politikasını çalıştırdığından emin ol.");
+      return;
     }
+
+    setKonular((prev) => prev.filter((k) => k.id !== konuId));
   }
 
   async function yorumSil(konuId: string, yorumId: string) {
     if (!adminMi) return;
-    const { error } = await supabase.from("forum_yorumlar").delete().eq("id", yorumId);
-    if (!error) {
-      setKonular((prev) =>
-        prev.map((k) =>
-          k.id === konuId ? { ...k, yorumlar: k.yorumlar.filter((y) => y.id !== yorumId) } : k
-        )
-      );
+
+    const { data, error } = await supabase
+      .from("forum_yorumlar")
+      .delete()
+      .eq("id", yorumId)
+      .select();
+
+    if (error || !data || data.length === 0) {
+      alert("Yorum veritabanından silinemedi!");
+      return;
     }
+
+    setKonular((prev) =>
+      prev.map((k) =>
+        k.id === konuId ? { ...k, yorumlar: k.yorumlar.filter((y) => y.id !== yorumId) } : k
+      )
+    );
   }
 
   const filtrelenmis = konular
