@@ -35,6 +35,8 @@ const SOZLUK: Record<string, string> = {
   "Druid": "Druid",
   "Root Rider": "Orman Binici",
   "Ruin Witch": "Yıkım Cadısı",
+  "Meteor Golem": "Meteor Golem",
+  "Furnace": "Fırın",
   "Wall Wrecker": "Tokmak",
   "Battle Blimp": "Zeplin",
   "Stone Slammer": "Kaya Balonu",

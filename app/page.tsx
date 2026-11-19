@@ -5,6 +5,7 @@ import { tr } from "./isimler";
 import { supabase } from "./supabase";
 import { gercekAzami } from "./thSinirlari";
 import { gorselYolu } from "./gorseller";
+import OyunSayaclari from "./OyunSayaclari";
 
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
@@ -160,26 +161,30 @@ const VITRIN_KARTLARI = [
   {
     href: "/hesaplayici",
     ikon: "🧱",
-    baslik: "Duvar & Süre Hesaplayıcı",
-    aciklama: "Altın Bilet indirimi, inşaat süresi ve yeşil taş maliyetlerini anında hesapla.",
+    baslik: "Gelişim & Maliyet Hesaplayıcıları",
+    aciklama:
+      "Duvar basım maliyetlerini, Altın Bilet (%10-%20) indirim avantajını, kahraman ekipmanları için gereken Cevher (Ore) miktarını ve inşaat sürelerini tek ekranda hesapla.",
   },
   {
     href: "/ansiklopedi",
     ikon: "📖",
-    baslik: "Kapsamlı Oyun Rehberi",
-    aciklama: "6 Kahraman, Kuşatma Makineleri, birlikler, büyüler ve savunmaların taktik ipuçları.",
+    baslik: "Kapsamlı Oyun Ansiklopedisi",
+    aciklama:
+      "Ejder Dükü dahil 6 Kahramanın yeteneklerini, Kuşatma Makinelerini, iksir & kara iksir birliklerini, büyüleri ve savunma yapılarının taktik zayıflıklarını incele.",
   },
   {
     href: "/klanlar",
     ikon: "🛡️",
-    baslik: "Klan & Savaş Analizi",
-    aciklama: "Klan etiketini gir; savaş serisini, BB dağılımını ve üye listesini tek tıkla incele.",
+    baslik: "Canlı Klan & Savaş Analizi",
+    aciklama:
+      "Klan etiketini girerek güncel Klan Savaşı ve CWL skorlarını, kazanma serisini, Belediye Binası dağılımını ve üyelerin bağış/kupa performansını anında takip et.",
   },
   {
     href: "/ordular",
     ikon: "⚔️",
-    baslik: "Meta Ordular & Taktikler",
-    aciklama: "Belediye Binana uygun en güncel 3 yıldız ordularını ve Sargyt özel taktiklerini keşfet.",
+    baslik: "Meta Ordular & Saldırı Taktikleri",
+    aciklama:
+      "Belediye Binası seviyene özel en güçlü 3 yıldız ordu kombinasyonlarını, kahraman ekipman eşleşmelerini, büyü dağılımlarını ve tek tıkla oyuna aktarma bağlantılarını keşfet.",
   },
 ];
 
@@ -752,7 +757,7 @@ export default function Home() {
 
   return (
     <main style={{ padding: "32px 24px", maxWidth: 1360, width: "100%", margin: "0 auto" }}>
-      {/* ÜST ARAMA BÖLÜMÜ */}
+     {/* ÜST ARAMA BÖLÜMÜ */}
       <section
         style={{
           padding: "24px 28px",
@@ -805,15 +810,19 @@ export default function Home() {
         {hata && <p style={{ color: "#ef6b5f", marginTop: 14, fontWeight: 600 }}>{hata}</p>}
       </section>
 
-      {/* HENÜZ KÖY ARANMADIYSA: HIZLI ERİŞİM VİTRİN KARTLARI */}
+      {/* CANLI OYUN ETKİNLİKLERİ & SEZON SAYAÇLARI (2 x 2) */}
+      <OyunSayaclari />
+      
+
+      {/* HENÜZ KÖY ARANMADIYSA: 2 x 2 GENİŞ HIZLI ERİŞİM KARTLARI */}
       {!oyuncu && !yukleniyor && (
         <section>
           <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 16px" }}>🚀 Hızlı Erişim & Araçlar</h2>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: 18,
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 480px), 1fr))",
+              gap: 20,
             }}
           >
             {VITRIN_KARTLARI.map((kart) => (
@@ -821,25 +830,28 @@ export default function Home() {
                 key={kart.href}
                 href={kart.href}
                 style={{
-                  padding: 24,
+                  padding: "28px 30px",
                   background: "var(--kart)",
                   border: "1px solid var(--cizgi)",
-                  borderRadius: 16,
+                  borderRadius: 18,
                   textDecoration: "none",
                   color: "var(--fg)",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 10,
+                  gap: 12,
                 }}
               >
-                <div style={{ fontSize: 34 }}>{kart.ikon}</div>
-                <strong style={{ fontSize: 19, color: "var(--vurgu)" }}>{kart.baslik} ↗</strong>
-                <p style={{ margin: 0, fontSize: 14, opacity: 0.8, lineHeight: 1.5 }}>{kart.aciklama}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <span style={{ fontSize: 38 }}>{kart.ikon}</span>
+                  <strong style={{ fontSize: 20, color: "var(--vurgu)" }}>{kart.baslik} ↗</strong>
+                </div>
+                <p style={{ margin: 0, fontSize: 15, opacity: 0.84, lineHeight: 1.6 }}>{kart.aciklama}</p>
               </Link>
             ))}
           </div>
         </section>
       )}
+      
 
       {/* KÖY ANALİZ SONUÇLARI */}
       {oyuncu && (

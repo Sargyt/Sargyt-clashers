@@ -1,48 +1,118 @@
 @import "tailwindcss";
 
+/* 1. EJDERHA ATEŞİ (Göz yormayan varsayılan ana tema) */
 :root,
-[data-theme="altin-koyu"] {
-  --bg: #14130f;
-  --fg: #f1eee4;
-  --kart: #1e1c16;
-  --cizgi: #363226;
+html[data-theme="altin-koyu"] {
+  --bg: #12100c;
+  --fg: #f2efe6;
+  --kart: #1b1812;
+  --cizgi: #332d21;
   --vurgu: #f0b429;
+  --leke-1: rgba(240, 180, 41, 0.20);
+  --leke-2: rgba(180, 110, 15, 0.22);
+  --leke-3: rgba(255, 205, 80, 0.10);
   color-scheme: dark;
 }
 
-[data-theme="altin-acik"] {
-  --bg: #f6f4ee;
-  --fg: #1d1b16;
-  --kart: #ffffff;
-  --cizgi: #e3dfd2;
-  --vurgu: #c8870b;
-  color-scheme: light;
-}
-
-[data-theme="mor-siyah"] {
+/* 2. HİÇLİK MORU (Orijinal Mor-Siyah) */
+html[data-theme="mor-siyah"] {
   --bg: #0d0a14;
   --fg: #ece8f5;
   --kart: #1a1424;
   --cizgi: #2e2540;
   --vurgu: #a78bfa;
+  --leke-1: rgba(167, 139, 250, 0.24);
+  --leke-2: rgba(109, 40, 217, 0.26);
+  --leke-3: rgba(196, 181, 253, 0.12);
   color-scheme: dark;
 }
 
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+/* 3. KANLI AY */
+html[data-theme="kanli-ay"] {
+  --bg: #080607;
+  --fg: #f3eaec;
+  --kart: #120c0e;
+  --cizgi: #2d181e;
+  --vurgu: #c81d38;
+  --leke-1: rgba(185, 20, 46, 0.28);
+  --leke-2: rgba(120, 10, 30, 0.30);
+  --leke-3: rgba(220, 38, 68, 0.14);
+  color-scheme: dark;
 }
 
-a {
-  color: var(--vurgu);
+/* 4. ZEHİRLİ SARMAŞIK */
+html[data-theme="zumrut-orman"] {
+  --bg: #070e0b;
+  --fg: #e6f4ed;
+  --kart: #0e1b15;
+  --cizgi: #1d362a;
+  --vurgu: #10b981;
+  --leke-1: rgba(16, 185, 129, 0.22);
+  --leke-2: rgba(6, 95, 70, 0.26);
+  --leke-3: rgba(52, 211, 153, 0.11);
+  color-scheme: dark;
 }
+
+/* 5. ELEKTRO TİTAN */
+html[data-theme="buzul-efsane"] {
+  --bg: #070b12;
+  --fg: #e6eef8;
+  --kart: #0e1624;
+  --cizgi: #1e2f4d;
+  --vurgu: #38bdf8;
+  --leke-1: rgba(56, 189, 248, 0.22);
+  --leke-2: rgba(14, 116, 144, 0.24);
+  --leke-3: rgba(125, 211, 252, 0.11);
+  color-scheme: dark;
+}
+
+/* 6. KRALİYET PARŞÖMENİ */
+html[data-theme="parsomen-acik"] {
+  --bg: #f5f2ea;
+  --fg: #1b1815;
+  --kart: #ffffff;
+  --cizgi: #ded8c8;
+  --vurgu: #b87308;
+  --leke-1: rgba(200, 135, 11, 0.14);
+  --leke-2: rgba(180, 110, 10, 0.12);
+  --leke-3: rgba(220, 160, 30, 0.08);
+  color-scheme: light;
+}
+
 * {
   box-sizing: border-box;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  background-color: var(--bg);
+}
+
+body {
+  position: relative;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh;
+  margin: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    radial-gradient(ellipse 52% 30% at 12% 14%, var(--leke-1) 0%, transparent 68%),
+    radial-gradient(ellipse 46% 36% at 88% 22%, var(--leke-2) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 26% at 26% 56%, var(--leke-3) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 34% at 84% 82%, var(--leke-1) 0%, transparent 72%),
+    radial-gradient(ellipse 42% 24% at 48% 95%, var(--leke-2) 0%, transparent 65%);
+}
+
+a {
+  color: var(--vurgu);
 }
 
 input,
@@ -60,20 +130,13 @@ h1 {
   line-height: 1.2;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   nav {
     padding: 10px 14px !important;
-    gap: 4px !important;
+    gap: 6px !important;
   }
   main {
     padding-left: 14px !important;
     padding-right: 14px !important;
   }
-}
-body {
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--vurgu) 16%, transparent), transparent 70%),
-    var(--bg);
-  background-attachment: fixed;
-  min-height: 100vh;
 }

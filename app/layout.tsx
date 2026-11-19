@@ -23,13 +23,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="tr"
+      data-theme="altin-koyu"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("tema");if(t){document.documentElement.setAttribute("data-theme",t);}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
-  <Menu />
-  {children}
-  <Altbilgi />
-</body>
+        <Menu />
+        {children}
+        <Altbilgi />
+      </body>
     </html>
   );
 }

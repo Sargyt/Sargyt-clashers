@@ -139,6 +139,22 @@ export default function ForumSayfasi() {
     setYukleniyor(false);
   }, []);
 
+  // Düzenler sayfasından gelen talep kodunu otomatik olarak forma doldurur
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const talepKod = params.get("talepKod");
+    const talepAd = params.get("talepAd");
+
+    if (talepKod) {
+      setYeniFormAcik(true);
+      setKategori("Köy Düzeni");
+      setBaslik(`${talepKod} Kodlu Düzen Hakkında Güncelleme Talebi`);
+      setIcerik(
+        `Sargyt hocam, ${talepKod}${talepAd ? ` (${talepAd})` : ""} düzeni güncel metada zayıf kalmış. Uygun olduğunuzda kaldırabilir veya yenisiyle güncelleyebilir misiniz?`
+      );
+    }
+  }, []);
+
   useEffect(() => {
     try {
       const kayitOylar = JSON.parse(localStorage.getItem("sargyt_forum_oylar") || "[]");
@@ -281,7 +297,7 @@ export default function ForumSayfasi() {
     setYorumGonderiliyor(false);
   }
 
-async function konuSil(konuId: string) {
+  async function konuSil(konuId: string) {
     if (!adminMi) return;
     if (!confirm("Bu konuyu ve altındaki tüm yorumları kalıcı olarak silmek istiyor musun?")) return;
 
