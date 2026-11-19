@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { supabase } from "../supabase";
 
 type Duzen = {
@@ -22,8 +22,28 @@ type OySatiri = {
   oy: number;
 };
 
+type CizimAraci = "kalem" | "ok" | "daire";
+
+type Nokta = { x: number; y: number };
+
+type CizimHamlesi = {
+  arac: CizimAraci;
+  renk: string;
+  kalinlik: number;
+  noktalar: Nokta[];
+};
+
 const ADMIN_EPOSTA = "sargytr0@gmail.com";
 const TH_SEVIYELERI = ["6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"];
+const CIZIM_RENKLERI = [
+  { ad: "Kırmızı", kod: "#ef4444" },
+  { ad: "Sarı", kod: "#facc15" },
+  { ad: "Mavi", kod: "#38bdf8" },
+  { ad: "Yeşil", kod: "#22c55e" },
+  { ad: "Mor", kod: "#c084fc" },
+  { ad: "Beyaz", kod: "#ffffff" },
+];
+
 function rastgeleKodUret(): string {
   const karakterler = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let sonuc = "#";
@@ -35,10 +55,486 @@ function rastgeleKodUret(): string {
 
 function gorselYoluCoz(gorsel: string): string {
   const temiz = gorsel.trim();
+  if (!temiz) return "";
   if (temiz.startsWith("http://") || temiz.startsWith("https://") || temiz.startsWith("/")) {
     return temiz;
   }
-  return `/duzenler/${temiz}`;
+  const uzantili = /\.(png|jpe?g|webp|gif)$/i.test(temiz) ? temiz : `${temiz}.png`;
+  return `/duzenler/${uzantili}`;
+}
+
+function hamleyiCiz(
+  ctx: CanvasRenderingContext2D,
+  hamle: CizimHamlesi,
+  w: number,
+  h: number
+) {
+  if (hamle.noktalar.length === 0) return;
+  const olcek = Math.max(w, h) / 900;
+  ctx.save();
+  ctx.strokeStyle = hamle.renk;
+  ctx.fillStyle = hamle.renk;
+  ctx.lineWidth = Math.max(2, hamle.kalinlik * olcek);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  if (hamle.arac === "kalem") {
+    ctx.beginPath();
+    ctx.moveTo(hamle.noktalar[0].x * w, hamle.noktalar[0].y * h);
+    for (let i = 1; i < hamle.noktalar.length; i++) {
+      ctx.lineTo(hamle.noktalar[i].x * w, hamle.noktalar[i].y * h);
+    }
+    ctx.stroke();
+  } else if (hamle.arac === "ok" && hamle.noktalar.length >= 2) {
+    const bas = hamle.noktalar[0];
+    const son = hamle.noktalar[hamle.noktalar.length - 1];
+    const x1 = bas.x * w;
+    const y1 = bas.y * h;
+    const x2 = son.x * w;
+    const y2 = son.y * h;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    const aci = Math.atan2(y2 - y1, x2 - x1);
+    const basBoyu = Math.max(12, hamle.kalinlik * 3.4 * olcek);
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - basBoyu * Math.cos(aci - Math.PI / 6), y2 - basBoyu * Math.sin(aci - Math.PI / 6));
+    ctx.lineTo(x2 - basBoyu * Math.cos(aci + Math.PI / 6), y2 - basBoyu * Math.sin(aci + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+  } else if (hamle.arac === "daire" && hamle.noktalar.length >= 2) {
+    const bas = hamle.noktalar[0];
+    const son = hamle.noktalar[hamle.noktalar.length - 1];
+    const cx = bas.x * w;
+    const cy = bas.y * h;
+    const dx = son.x * w - cx;
+    const dy = son.y * h - cy;
+    const r = Math.hypot(dx, dy);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function TaktikCizimModali({
+  duzen,
+  onKapat,
+}: {
+  duzen: Duzen;
+  onKapat: () => void;
+}) {
+  const [arac, setArac] = useState<CizimAraci>("kalem");
+  const [renk, setRenk] = useState("#ef4444");
+  const [kalinlik, setKalinlik] = useState(5);
+  const [hamleler, setHamleler] = useState<CizimHamlesi[]>([]);
+  const [aktifHamle, setAktifHamle] = useState<CizimHamlesi | null>(null);
+  const [indiriliyor, setIndiriliyor] = useState(false);
+
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const ciziyorRef = useRef(false);
+
+  const tuvaliYenile = useCallback(
+    (liste: CizimHamlesi[], anlik: CizimHamlesi | null) => {
+      const canvas = canvasRef.current;
+      const img = imgRef.current;
+      if (!canvas || !img) return;
+
+      const rect = img.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const hedefW = Math.round(rect.width * dpr);
+      const hedefH = Math.round(rect.height * dpr);
+
+      if (canvas.width !== hedefW || canvas.height !== hedefH) {
+        canvas.width = hedefW;
+        canvas.height = hedefH;
+      }
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const h of liste) {
+        hamleyiCiz(ctx, h, canvas.width, canvas.height);
+      }
+      if (anlik) {
+        hamleyiCiz(ctx, anlik, canvas.width, canvas.height);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    tuvaliYenile(hamleler, aktifHamle);
+  }, [hamleler, aktifHamle, tuvaliYenile]);
+
+  useEffect(() => {
+    const yenidenBoyutla = () => tuvaliYenile(hamleler, aktifHamle);
+    window.addEventListener("resize", yenidenBoyutla);
+    return () => window.removeEventListener("resize", yenidenBoyutla);
+  }, [hamleler, aktifHamle, tuvaliYenile]);
+
+  function noktaAl(e: ReactPointerEvent<HTMLCanvasElement>): Nokta | null {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
+    const x = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+    const y = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height));
+    return { x, y };
+  }
+
+  function basla(e: ReactPointerEvent<HTMLCanvasElement>) {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const p = noktaAl(e);
+    if (!p) return;
+    ciziyorRef.current = true;
+    setAktifHamle({ arac, renk, kalinlik, noktalar: [p] });
+  }
+
+  function hareket(e: ReactPointerEvent<HTMLCanvasElement>) {
+    if (!ciziyorRef.current) return;
+    e.preventDefault();
+    const p = noktaAl(e);
+    if (!p) return;
+
+    setAktifHamle((prev) => {
+      if (!prev) return null;
+      if (prev.arac === "kalem") {
+        return { ...prev, noktalar: [...prev.noktalar, p] };
+      }
+      return { ...prev, noktalar: [prev.noktalar[0], p] };
+    });
+  }
+
+  function bitir(e: ReactPointerEvent<HTMLCanvasElement>) {
+    if (!ciziyorRef.current) return;
+    e.preventDefault();
+    ciziyorRef.current = false;
+    setAktifHamle((prev) => {
+      if (prev && prev.noktalar.length > 0) {
+        setHamleler((eski) => [...eski, prev]);
+      }
+      return null;
+    });
+  }
+
+  function gorseliIndir() {
+    const img = imgRef.current;
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+
+    setIndiriliyor(true);
+    try {
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = img.naturalWidth;
+      exportCanvas.height = img.naturalHeight;
+      const ctx = exportCanvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(img, 0, 0, exportCanvas.width, exportCanvas.height);
+      for (const h of hamleler) {
+        hamleyiCiz(ctx, h, exportCanvas.width, exportCanvas.height);
+      }
+
+      const link = document.createElement("a");
+      const temizKod = duzen.kod.replace(/[^A-Z0-9]/gi, "");
+      link.download = `sargyt-taktik-${temizKod || "duzen"}.png`;
+      link.href = exportCanvas.toDataURL("image/png");
+      link.click();
+    } catch {
+      alert("Harici sunucudaki görsel güvenlik kısıtı nedeniyle indirilemedi. Yerel (public/duzenler) görseller sorunsuz indirilir.");
+    } finally {
+      setIndiriliyor(false);
+    }
+  }
+
+  return (
+    <div
+      onClick={onKapat}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0, 0, 0, 0.88)",
+        zIndex: 60,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "clamp(8px, 2vw, 20px)",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: 1180,
+          width: "100%",
+          maxHeight: "94vh",
+          background: "var(--kart)",
+          border: "1.5px solid var(--vurgu)",
+          borderRadius: 18,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* ÜST BAŞLIK BARI */}
+        <div
+          style={{
+            padding: "12px 18px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderBottom: "1px solid var(--cizgi)",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span
+              style={{
+                padding: "3px 9px",
+                borderRadius: 7,
+                background: "var(--vurgu)",
+                color: "#111",
+                fontWeight: 900,
+                fontSize: 12.5,
+              }}
+            >
+              {duzen.kod}
+            </span>
+            <strong style={{ fontSize: 16 }}>{duzen.baslik}</strong>
+            <span style={{ fontSize: 12, opacity: 0.7 }}>
+              (Çizimler sadece senin cihazında kalır)
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={onKapat}
+            style={{
+              padding: "6px 14px",
+              borderRadius: 9,
+              border: "1px solid var(--cizgi)",
+              background: "var(--bg)",
+              color: "var(--fg)",
+              fontWeight: 800,
+              cursor: "pointer",
+              minHeight: 36,
+            }}
+          >
+            ✕ Kapat
+          </button>
+        </div>
+
+        {/* TAKTİK ÇİZİM ARAÇ ÇUBUĞU */}
+        <div
+          style={{
+            padding: "10px 16px",
+            background: "var(--bg)",
+            borderBottom: "1px solid var(--cizgi)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
+          {/* Araç Seçimi */}
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+            {(
+              [
+                { id: "kalem", ad: "✏️ Kalem" },
+                { id: "ok", ad: "➡️ Ok" },
+                { id: "daire", ad: "⭕ Alan" },
+              ] as const
+            ).map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => setArac(a.id)}
+                style={{
+                  padding: "6px 12px",
+                  minHeight: 36,
+                  borderRadius: 9,
+                  border: "1px solid " + (arac === a.id ? "var(--vurgu)" : "var(--cizgi)"),
+                  background: arac === a.id ? "var(--vurgu)" : "var(--kart)",
+                  color: arac === a.id ? "#111" : "var(--fg)",
+                  fontWeight: 800,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
+                {a.ad}
+              </button>
+            ))}
+
+            {/* Kalınlık */}
+            <select
+              value={kalinlik}
+              onChange={(e) => setKalinlik(Number(e.target.value))}
+              aria-label="Çizgi kalınlığı"
+              style={{
+                padding: "6px 10px",
+                minHeight: 36,
+                borderRadius: 9,
+                border: "1px solid var(--cizgi)",
+                background: "var(--kart)",
+                color: "var(--fg)",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              <option value={3}>İnce</option>
+              <option value={5}>Orta</option>
+              <option value={9}>Kalın</option>
+            </select>
+          </div>
+
+          {/* Renk Paleti */}
+          <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
+            {CIZIM_RENKLERI.map((r) => (
+              <button
+                key={r.kod}
+                type="button"
+                onClick={() => setRenk(r.kod)}
+                title={r.ad}
+                aria-label={r.ad}
+                style={{
+                  width: 26,
+                  height: 26,
+                  minHeight: 26,
+                  borderRadius: "50%",
+                  background: r.kod,
+                  border: renk === r.kod ? "3px solid var(--vurgu)" : "2px solid var(--cizgi)",
+                  cursor: "pointer",
+                  transform: renk === r.kod ? "scale(1.15)" : "scale(1)",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Geri Al, Temizle & İndir */}
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              disabled={hamleler.length === 0}
+              onClick={() => setHamleler((prev) => prev.slice(0, -1))}
+              style={{
+                padding: "6px 11px",
+                minHeight: 36,
+                borderRadius: 9,
+                border: "1px solid var(--cizgi)",
+                background: "var(--kart)",
+                color: "var(--fg)",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: hamleler.length === 0 ? "not-allowed" : "pointer",
+                opacity: hamleler.length === 0 ? 0.45 : 1,
+              }}
+            >
+              ↩️ Geri Al
+            </button>
+
+            <button
+              type="button"
+              disabled={hamleler.length === 0}
+              onClick={() => setHamleler([])}
+              style={{
+                padding: "6px 11px",
+                minHeight: 36,
+                borderRadius: 9,
+                border: "1px solid var(--cizgi)",
+                background: "var(--kart)",
+                color: "#ef6b5f",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: hamleler.length === 0 ? "not-allowed" : "pointer",
+                opacity: hamleler.length === 0 ? 0.45 : 1,
+              }}
+            >
+              🧹 Temizle
+            </button>
+
+            <button
+              type="button"
+              disabled={indiriliyor}
+              onClick={gorseliIndir}
+              style={{
+                padding: "6px 14px",
+                minHeight: 36,
+                borderRadius: 9,
+                border: 0,
+                background: "var(--vurgu)",
+                color: "#111",
+                fontSize: 13,
+                fontWeight: 900,
+                cursor: "pointer",
+              }}
+            >
+              {indiriliyor ? "Hazırlanıyor..." : "💾 PNG İndir"}
+            </button>
+          </div>
+        </div>
+
+        {/* ÇİZİM TUVALİ & GÖRSEL ALANI */}
+        <div
+          style={{
+            flex: 1,
+            overflow: "auto",
+            background: "#09090b",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 12,
+          }}
+        >
+          <div style={{ position: "relative", display: "inline-block", maxWidth: "100%" }}>
+            <img
+              ref={imgRef}
+              src={gorselYoluCoz(duzen.gorsel)}
+              alt={duzen.baslik}
+              crossOrigin="anonymous"
+              draggable={false}
+              onLoad={() => tuvaliYenile(hamleler, aktifHamle)}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "72vh",
+                display: "block",
+                userSelect: "none",
+                borderRadius: 8,
+              }}
+            />
+            <canvas
+              ref={canvasRef}
+              onPointerDown={basla}
+              onPointerMove={hareket}
+              onPointerUp={bitir}
+              onPointerCancel={bitir}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                touchAction: "none",
+                cursor: "crosshair",
+                borderRadius: 8,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function DuzenGorselKutusu({
@@ -62,11 +558,12 @@ function DuzenGorselKutusu({
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") onBuyut();
       }}
-      title="Tam ekran incelemek için tıkla"
+      title="Büyütmek veya taktik çizmek için tıkla"
       style={{
         position: "relative",
         width: "100%",
         aspectRatio: "16 / 9",
+        maxHeight: 205,
         background: "var(--bg)",
         borderBottom: "1px solid var(--cizgi)",
         overflow: "hidden",
@@ -89,8 +586,8 @@ function DuzenGorselKutusu({
             textAlign: "center",
           }}
         >
-          <span style={{ fontSize: 38 }}>🏰</span>
-          <strong style={{ fontSize: 15, color: "var(--vurgu)" }}>Belediye Binası {th} Düzeni</strong>
+          <span style={{ fontSize: 34 }}>🏰</span>
+          <strong style={{ fontSize: 14, color: "var(--vurgu)" }}>Belediye Binası {th} Düzeni</strong>
           <span style={{ fontSize: 12 }}>Önizleme görseli henüz yüklenmedi</span>
         </div>
       ) : (
@@ -110,18 +607,18 @@ function DuzenGorselKutusu({
       <span
         style={{
           position: "absolute",
-          right: 10,
-          bottom: 10,
+          right: 8,
+          bottom: 8,
           padding: "4px 9px",
           borderRadius: 8,
-          background: "rgba(10, 10, 12, 0.78)",
+          background: "rgba(10, 10, 12, 0.8)",
           color: "#fff",
           fontSize: 11.5,
           fontWeight: 700,
           backdropFilter: "blur(4px)",
         }}
       >
-        🔍 Büyüt
+        ✏️ Büyüt &amp; Taktik Çiz
       </span>
     </div>
   );
@@ -141,7 +638,7 @@ export default function DuzenlerSayfasi() {
   const [arama, setArama] = useState("");
   const [siralama, setSiralama] = useState<"yeni" | "populer" | "kopyalama">("yeni");
 
-  // Bildirim & Büyütme Modalı
+  // Bildirim & Büyütme/Çizim Modalı
   const [uyariMesaji, setUyariMesaji] = useState("");
   const [buyukDuzen, setBuyukDuzen] = useState<Duzen | null>(null);
 
@@ -285,10 +782,11 @@ export default function DuzenlerSayfasi() {
     }
   }
 
- async function kopyalamaArtir(duzen: Duzen) {
+  async function kopyalamaArtir(duzen: Duzen) {
     const yeniSayi = (duzen.kopyalama ?? 0) + 1;
     setDuzenler((prev) => prev.map((d) => (d.id === duzen.id ? { ...d, kopyalama: yeniSayi } : d)));
-await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
+    await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });
+  }
 
   function netSkorHesapla(duzenId: string): number {
     return oylar.filter((o) => o.duzen_id === duzenId).reduce((toplam, o) => toplam + o.oy, 0);
@@ -353,10 +851,10 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
       >
         <div>
           <h1 style={{ fontSize: "clamp(24px, 4vw, 34px)", fontWeight: 900, margin: "0 0 6px" }}>
-            🗺️ Köy Düzenleri &amp; Kopyalama Galerisi
+            🗺️ Köy Düzenleri &amp; Taktik Tahtası
           </h1>
           <p style={{ opacity: 0.75, margin: 0, fontSize: 15 }}>
-            Güncel turnuva ve lig köy düzenlerini incele, tek tıkla oyununa kopyala veya üyeliğinle oy ver.
+            Güncel düzenleri incele, üzerine kendi saldırı taktiğini çizip cihazına indir veya tek tıkla oyununa kopyala.
           </p>
         </div>
 
@@ -458,7 +956,7 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
           </h2>
 
           <span style={{ fontSize: 12.5, opacity: 0.75, textAlign: "center" }}>
-            Görselleri <code>public/duzenler/</code> klasörüne koyup adını yazabilir veya doğrudan resim linki girebilirsin.
+            Görselleri <code>public/duzenler/</code> klasörüne koyup adını yazabilirsin (.png otomatik eklenir; .jpg/.webp için uzantıyı yaz).
           </span>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12 }}>
@@ -501,7 +999,7 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
               required
               value={yeniBaslik}
               onChange={(e) => setYeniBaslik(e.target.value)}
-              placeholder="Düzen Başlığı (örn. BB17 Elmas Anti-3 Savaş Düzeni)"
+              placeholder="Düzen Başlığı (örn. BB19 Elmas Anti-3 Savaş Düzeni)"
               style={{
                 padding: 11,
                 borderRadius: 10,
@@ -565,7 +1063,7 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
               required
               value={yeniGorsel}
               onChange={(e) => setYeniGorsel(e.target.value)}
-              placeholder="Görsel Dosya Adı (örn. bb17-savas-1.png veya https://...)"
+              placeholder="Görsel Dosya Adı (örn. bb19-savas-1.png veya https://...)"
               style={{
                 padding: 11,
                 borderRadius: 10,
@@ -700,7 +1198,7 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
         )}
       </div>
 
-      {/* DÜZEN KARTLARI IZGARASI */}
+      {/* KOMPAKT DÜZEN KARTLARI IZGARASI */}
       <h2 className="baslik-serit" style={{ marginTop: 0 }}>
         <span>🗺️ Yayınlanan Köy Düzenleri ({filtrelenmis.length})</span>
       </h2>
@@ -729,8 +1227,8 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))",
-            gap: 20,
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 310px), 1fr))",
+            gap: 18,
           }}
         >
           {filtrelenmis.map((d) => {
@@ -744,7 +1242,7 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                 style={{
                   background: "var(--kart)",
                   border: "1px solid var(--cizgi)",
-                  borderRadius: 18,
+                  borderRadius: 16,
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
@@ -752,7 +1250,7 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                 }}
               >
                 <div>
-                  {/* 16:9 Köy Düzeni Önizleme Görseli */}
+                  {/* Kompakt 16:9 Köy Düzeni Önizleme Görseli */}
                   <DuzenGorselKutusu
                     gorsel={d.gorsel}
                     baslik={d.baslik}
@@ -761,23 +1259,23 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                   />
 
                   {/* Kart Bilgileri */}
-                  <div style={{ padding: "16px 20px" }}>
+                  <div style={{ padding: "13px 15px" }}>
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        gap: 8,
+                        gap: 6,
                         flexWrap: "wrap",
                         marginBottom: 8,
                       }}
                     >
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
                         <span
                           style={{
-                            fontSize: 12,
-                            padding: "3px 9px",
-                            borderRadius: 7,
+                            fontSize: 11.5,
+                            padding: "2px 8px",
+                            borderRadius: 6,
                             background: "var(--vurgu)",
                             color: "#111",
                             fontWeight: 900,
@@ -788,9 +1286,9 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                         </span>
                         <span
                           style={{
-                            fontSize: 12,
-                            padding: "3px 9px",
-                            borderRadius: 7,
+                            fontSize: 11.5,
+                            padding: "2px 8px",
+                            borderRadius: 6,
                             background: "var(--bg)",
                             border: "1px solid var(--cizgi)",
                             fontWeight: 700,
@@ -798,34 +1296,37 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                         >
                           BB {d.th} · {d.tur}
                         </span>
-                        <span
-                          style={{
-                            fontSize: 12,
-                            padding: "3px 9px",
-                            borderRadius: 7,
-                            background: "var(--bg)",
-                            border: "1px solid var(--cizgi)",
-                            fontWeight: 600,
-                            opacity: 0.85,
-                          }}
-                        >
-                          {d.etiket}
-                        </span>
                       </div>
 
-                      <span style={{ fontSize: 12, opacity: 0.7, fontWeight: 700 }}>
-                        📋 {d.kopyalama ?? 0} kopyalama
+                      <span style={{ fontSize: 11.5, opacity: 0.7, fontWeight: 700 }}>
+                        📋 {d.kopyalama ?? 0}
                       </span>
                     </div>
 
-                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, lineHeight: 1.3 }}>{d.baslik}</h2>
+                    <h2 style={{ margin: "0 0 6px", fontSize: 16.5, fontWeight: 800, lineHeight: 1.3 }}>
+                      {d.baslik}
+                    </h2>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        fontSize: 11.5,
+                        padding: "2px 8px",
+                        borderRadius: 6,
+                        background: "var(--bg)",
+                        border: "1px solid var(--cizgi)",
+                        fontWeight: 600,
+                        opacity: 0.85,
+                      }}
+                    >
+                      {d.etiket}
+                    </span>
                   </div>
                 </div>
 
-                {/* ALT AKSİYON ÇUBUĞU: Reddit Oylama + Forum Talep + Oyuna Kopyala */}
+                {/* ALT AKSİYON ÇUBUĞU */}
                 <div
                   style={{
-                    padding: "12px 18px",
+                    padding: "10px 13px",
                     background: "color-mix(in srgb, var(--bg) 55%, var(--kart))",
                     borderTop: "1px solid var(--cizgi)",
                     display: "flex",
@@ -840,7 +1341,7 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
-                      borderRadius: 10,
+                      borderRadius: 9,
                       border: "1px solid var(--cizgi)",
                       background: "var(--bg)",
                       overflow: "hidden",
@@ -851,14 +1352,14 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                       onClick={() => oyVer(d.id, 1)}
                       title={kullaniciId ? "Sağlam Düzen (+1)" : "Oy vermek için giriş yap"}
                       style={{
-                        padding: "6px 10px",
+                        padding: "5px 8px",
                         border: 0,
                         background: benimOyum === 1 ? "rgba(34, 197, 94, 0.2)" : "transparent",
                         color: benimOyum === 1 ? "#22c55e" : "var(--fg)",
                         fontWeight: 900,
-                        fontSize: 14,
+                        fontSize: 13,
                         cursor: "pointer",
-                        minHeight: 34,
+                        minHeight: 32,
                       }}
                     >
                       ▲
@@ -866,8 +1367,8 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
 
                     <span
                       style={{
-                        padding: "0 8px",
-                        fontSize: 13.5,
+                        padding: "0 6px",
+                        fontSize: 13,
                         fontWeight: 900,
                         fontVariantNumeric: "tabular-nums",
                         color: skor > 0 ? "#22c55e" : skor < 0 ? "#ef6b5f" : "var(--fg)",
@@ -881,14 +1382,14 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                       onClick={() => oyVer(d.id, -1)}
                       title={kullaniciId ? "Zayıf / Eski Düzen (-1)" : "Oy vermek için giriş yap"}
                       style={{
-                        padding: "6px 10px",
+                        padding: "5px 8px",
                         border: 0,
                         background: benimOyum === -1 ? "rgba(239, 68, 68, 0.2)" : "transparent",
                         color: benimOyum === -1 ? "#ef6b5f" : "var(--fg)",
                         fontWeight: 900,
-                        fontSize: 14,
+                        fontSize: 13,
                         cursor: "pointer",
-                        minHeight: 34,
+                        minHeight: 32,
                       }}
                     >
                       ▼
@@ -896,22 +1397,22 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                   </div>
 
                   {/* Sağ Butonlar */}
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
                     {adminMi && (
                       <button
                         type="button"
                         onClick={() => duzenSil(d.id)}
                         title="Düzeni Sil"
                         style={{
-                          padding: "6px 10px",
-                          borderRadius: 9,
+                          padding: "5px 8px",
+                          borderRadius: 8,
                           border: "1px solid #ef6b5f",
                           background: "transparent",
                           color: "#ef6b5f",
-                          fontSize: 12.5,
+                          fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
-                          minHeight: 34,
+                          minHeight: 32,
                         }}
                       >
                         🗑️
@@ -922,20 +1423,20 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                       href={forumTalepUrl}
                       title="Bu düzen için Forumda güncelleme talebi oluştur"
                       style={{
-                        padding: "6px 11px",
-                        borderRadius: 9,
+                        padding: "5px 9px",
+                        borderRadius: 8,
                         border: "1px solid var(--cizgi)",
                         background: "var(--bg)",
                         color: "var(--fg)",
                         textDecoration: "none",
-                        fontSize: 12.5,
+                        fontSize: 12,
                         fontWeight: 700,
                         display: "inline-flex",
                         alignItems: "center",
-                        minHeight: 34,
+                        minHeight: 32,
                       }}
                     >
-                      📢 Talep Oluştur
+                      📢 Talep
                     </Link>
 
                     <a
@@ -944,19 +1445,19 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
                       rel="noopener noreferrer"
                       onClick={() => kopyalamaArtir(d)}
                       style={{
-                        padding: "6px 13px",
-                        borderRadius: 9,
+                        padding: "5px 11px",
+                        borderRadius: 8,
                         background: "var(--vurgu)",
                         color: "#111",
                         textDecoration: "none",
-                        fontSize: 12.5,
+                        fontSize: 12,
                         fontWeight: 800,
                         display: "inline-flex",
                         alignItems: "center",
-                        minHeight: 34,
+                        minHeight: 32,
                       }}
                     >
-                      🎮 Oyuna Kopyala ↗
+                      🎮 Kopyala ↗
                     </a>
                   </div>
                 </div>
@@ -966,70 +1467,9 @@ await supabase.rpc("duzen_kopyala_artir", { hedef_id: duzen.id });  }
         </div>
       )}
 
-      {/* TAM EKRAN GÖRSEL BÜYÜTME MODALI */}
+      {/* BÜYÜTME & TAKTİK ÇİZİM TAHTASI MODALI */}
       {buyukDuzen && (
-        <div
-          onClick={() => setBuyukDuzen(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.85)",
-            zIndex: 50,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: 1000,
-              width: "100%",
-              background: "var(--kart)",
-              border: "1px solid var(--vurgu)",
-              borderRadius: 18,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "14px 20px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                borderBottom: "1px solid var(--cizgi)",
-                gap: 12,
-              }}
-            >
-              <div>
-                <span style={{ color: "var(--vurgu)", fontWeight: 900, marginRight: 8 }}>{buyukDuzen.kod}</span>
-                <strong>{buyukDuzen.baslik}</strong>
-              </div>
-              <button
-                type="button"
-                onClick={() => setBuyukDuzen(null)}
-                style={{
-                  padding: "6px 14px",
-                  borderRadius: 8,
-                  border: "1px solid var(--cizgi)",
-                  background: "var(--bg)",
-                  color: "var(--fg)",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  minHeight: 34,
-                }}
-              >
-                ✕ Kapat
-              </button>
-            </div>
-            <img
-              src={gorselYoluCoz(buyukDuzen.gorsel)}
-              alt={buyukDuzen.baslik}
-              style={{ width: "100%", maxHeight: "75vh", objectFit: "contain", display: "block", background: "#000" }}
-            />
-          </div>
-        </div>
+        <TaktikCizimModali duzen={buyukDuzen} onKapat={() => setBuyukDuzen(null)} />
       )}
     </main>
   );
