@@ -811,7 +811,7 @@ export default function Home() {
       </section>
 
       {/* CANLI OYUN ETKİNLİKLERİ & SEZON SAYAÇLARI (2 x 2) */}
-      <OyunSayaclari />
+      {!oyuncu && !yukleniyor && <OyunSayaclari />}
       
 
       {/* HENÜZ KÖY ARANMADIYSA: 2 x 2 GENİŞ HIZLI ERİŞİM KARTLARI */}

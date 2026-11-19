@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "./supabase";
 
 const TEMALAR = [
@@ -13,21 +13,27 @@ const TEMALAR = [
   { id: "parsomen-acik", ad: "⚪ Kraliyet Parşömeni" },
 ];
 
-const LINKLER = [
+const ANA_LINKLER = [
   { href: "/", ad: "Ana Sayfa" },
   { href: "/klanlar", ad: "Klanlar" },
-  { href: "/karsilastir", ad: "VS Karşılaştır" },
-  { href: "/ordular", ad: "Ordular" },
-  { href: "/duzenler", ad: "Düzenler" },
-  { href: "/ansiklopedi", ad: "Rehber" },
-  { href: "/hesaplayici", ad: "Hesaplayıcı" },
   { href: "/forum", ad: "Forum" },
   { href: "/favoriler", ad: "Favoriler" },
+];
+
+const ARAC_LINKLERI = [
+  { href: "/ordular", ikon: "⚔️", ad: "Meta Ordular", aciklama: "3 yıldız ordu & ekipman dizilimleri" },
+  { href: "/duzenler", ikon: "🗺️", ad: "Köy Düzenleri", aciklama: "Oyuna kopyalanabilir güncel düzenler" },
+  { href: "/karsilastir", ikon: "⚡", ad: "VS Karşılaştır", aciklama: "İki köyü veya klanı yan yana kıyasla" },
+  { href: "/ansiklopedi", ikon: "📖", ad: "Oyun Rehberi", aciklama: "Kahraman, birlik ve savunma taktikleri" },
+  { href: "/hesaplayici", ikon: "🧮", ad: "Hesaplayıcılar", aciklama: "Duvar, süre ve cevher maliyeti" },
 ];
 
 export default function Menu() {
   const [tema, setTema] = useState("altin-koyu");
   const [kullaniciEposta, setKullaniciEposta] = useState<string | null>(null);
+  const [araclarAcik, setAraclarAcik] = useState(false);
+  const acilirRef = useRef<HTMLDivElement>(null);
+
   const yol = usePathname();
   const router = useRouter();
 
@@ -65,6 +71,22 @@ export default function Menu() {
     };
   }, []);
 
+  // Dışarı tıklandığında açılır kutuyu kapat
+  useEffect(() => {
+    function disariTikla(e: MouseEvent) {
+      if (acilirRef.current && !acilirRef.current.contains(e.target as Node)) {
+        setAraclarAcik(false);
+      }
+    }
+    document.addEventListener("mousedown", disariTikla);
+    return () => document.removeEventListener("mousedown", disariTikla);
+  }, []);
+
+  // Sayfa değişince açılır kutuyu kapat
+  useEffect(() => {
+    setAraclarAcik(false);
+  }, [yol]);
+
   async function cikisYap() {
     await supabase.auth.signOut();
     setKullaniciEposta(null);
@@ -72,6 +94,8 @@ export default function Menu() {
   }
 
   const adminMi = kullaniciEposta?.toLowerCase() === "sargytr0@gmail.com";
+  const aracAktifMi = ARAC_LINKLERI.some((a) => a.href === yol);
+  const aktifYaziRengi = tema === "kanli-ay" ? "#ffffff" : "#111111";
 
   return (
     <nav
@@ -79,31 +103,32 @@ export default function Menu() {
         display: "flex",
         gap: 10,
         alignItems: "center",
-        padding: "14px 28px",
+        padding: "13px 26px",
         borderBottom: "1px solid var(--cizgi)",
-        background: "color-mix(in srgb, var(--kart) 88%, transparent)",
+        background: "color-mix(in srgb, var(--kart) 90%, transparent)",
         backdropFilter: "blur(10px)",
         flexWrap: "wrap",
         position: "sticky",
         top: 0,
-        zIndex: 20,
+        zIndex: 30,
       }}
     >
       <Link
         href="/"
+        className="oyun-baslik"
         style={{
-          marginRight: 12,
-          fontSize: 20,
-          fontWeight: 900,
+          marginRight: 10,
+          fontSize: 21,
+          fontWeight: 800,
           color: "var(--fg)",
           textDecoration: "none",
-          letterSpacing: "-0.3px",
         }}
       >
         ⚔️ Sargyt Clashers
       </Link>
 
-      {LINKLER.map((l) => {
+      {/* ANA SEKMELER */}
+      {ANA_LINKLER.map((l) => {
         const aktif = yol === l.href;
         return (
           <Link
@@ -114,7 +139,7 @@ export default function Menu() {
               borderRadius: 11,
               border: "1px solid " + (aktif ? "var(--vurgu)" : "var(--cizgi)"),
               background: aktif ? "var(--vurgu)" : "var(--bg)",
-              color: aktif ? (tema === "kanli-ay" ? "#ffffff" : "#111111") : "var(--fg)",
+              color: aktif ? aktifYaziRengi : "var(--fg)",
               fontWeight: 700,
               fontSize: 15,
               textDecoration: "none",
@@ -125,6 +150,85 @@ export default function Menu() {
         );
       })}
 
+      {/* AÇILIR ARAÇLAR & SİHİRBAZLAR KUTUSU */}
+      <div ref={acilirRef} style={{ position: "relative" }}>
+        <button
+          type="button"
+          onClick={() => setAraclarAcik((acik) => !acik)}
+          aria-expanded={araclarAcik}
+          style={{
+            padding: "9px 15px",
+            minHeight: 40,
+            borderRadius: 11,
+            border: "1px solid " + (aracAktifMi || araclarAcik ? "var(--vurgu)" : "var(--cizgi)"),
+            background: aracAktifMi ? "var(--vurgu)" : "var(--bg)",
+            color: aracAktifMi ? aktifYaziRengi : "var(--fg)",
+            fontWeight: 700,
+            fontSize: 15,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span>🧰 Araçlar</span>
+          <span style={{ fontSize: 11, opacity: 0.85 }}>{araclarAcik ? "▲" : "▼"}</span>
+        </button>
+
+        {araclarAcik && (
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 10px)",
+              left: 0,
+              width: "min(310px, 88vw)",
+              padding: 10,
+              borderRadius: 16,
+              background: "var(--kart)",
+              border: "1.5px solid var(--vurgu)",
+              boxShadow: "0 16px 40px rgba(0, 0, 0, 0.45)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              zIndex: 50,
+            }}
+          >
+            {ARAC_LINKLERI.map((a) => {
+              const aktif = yol === a.href;
+              return (
+                <Link
+                  key={a.href}
+                  href={a.href}
+                  onClick={() => setAraclarAcik(false)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "10px 12px",
+                    borderRadius: 12,
+                    border: "1px solid " + (aktif ? "var(--vurgu)" : "transparent"),
+                    background: aktif
+                      ? "color-mix(in srgb, var(--vurgu) 18%, var(--bg))"
+                      : "var(--bg)",
+                    color: "var(--fg)",
+                    textDecoration: "none",
+                  }}
+                >
+                  <span style={{ fontSize: 22, flexShrink: 0 }}>{a.ikon}</span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <strong style={{ fontSize: 14.5, color: aktif ? "var(--vurgu)" : "var(--fg)" }}>
+                      {a.ad}
+                    </strong>
+                    <span style={{ fontSize: 12, opacity: 0.72 }}>{a.aciklama}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* SAĞ TARAF: HESAP & TEMA */}
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         {kullaniciEposta ? (
           <>
@@ -150,6 +254,7 @@ export default function Menu() {
               onClick={cikisYap}
               style={{
                 padding: "9px 14px",
+                minHeight: 40,
                 borderRadius: 11,
                 border: "1px solid #ef4444",
                 background: "rgba(239, 68, 68, 0.14)",
@@ -170,7 +275,7 @@ export default function Menu() {
               borderRadius: 11,
               border: "1px solid " + (yol === "/giris" ? "var(--vurgu)" : "var(--cizgi)"),
               background: yol === "/giris" ? "var(--vurgu)" : "var(--bg)",
-              color: yol === "/giris" ? (tema === "kanli-ay" ? "#ffffff" : "#111111") : "var(--fg)",
+              color: yol === "/giris" ? aktifYaziRengi : "var(--fg)",
               fontWeight: 700,
               fontSize: 15,
               textDecoration: "none",
