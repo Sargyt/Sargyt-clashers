@@ -924,55 +924,51 @@ export default function Home() {
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "flex-start",
-                    justifyContent: "center",
-                    gap: 8,
+                    alignItems: "stretch",
+                    justifyContent: "space-between",
+                    gap: 14,
                     flex: "1 1 280px",
                     minWidth: 280,
+                    minHeight: IKON + 2 * 8 + 2 * KUTU_Y,
                   }}
                 >
-                  <h2
-                    style={{
-                      margin: 0,
-                      fontSize: isimBoyutu(oyuncu.isim),
-                      fontWeight: 900,
-                      lineHeight: 1.05,
-                      overflowWrap: "anywhere",
-                      maxWidth: "100%",
-                    }}
-                  >
-                    {oyuncu.isim}
-                  </h2>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 15, fontWeight: 700, opacity: 0.85 }}>{oyuncu.kod}</span>
-                    <span
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, paddingTop: 4 }}>
+                    <h2
                       style={{
-                        padding: "4px 12px",
-                        borderRadius: 10,
-                        background: "var(--vurgu)",
-                        color: "#111",
+                        margin: 0,
+                        fontSize: isimBoyutu(oyuncu.isim),
                         fontWeight: 900,
-                        fontSize: 14,
+                        lineHeight: 1.05,
+                        overflowWrap: "anywhere",
+                        maxWidth: "100%",
                       }}
                     >
-                      Belediye {oyuncu.thSeviyesi}
-                    </span>
+                      {oyuncu.isim}
+                    </h2>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, opacity: 0.85 }}>{oyuncu.kod}</span>
+                      <span
+                        style={{
+                          padding: "4px 12px",
+                          borderRadius: 10,
+                          background: "var(--vurgu)",
+                          color: "#111",
+                          fontWeight: 900,
+                          fontSize: 14,
+                        }}
+                      >
+                        Belediye {oyuncu.thSeviyesi}
+                      </span>
+                    </div>
                   </div>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr " + KUTU_Y + "px",
-                      gap: 10,
-                      width: "100%",
-                      marginTop: 4,
-                    }}
-                  >
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <button
                       type="button"
                       onClick={() => setProfilKartiAcik(true)}
                       style={{
+                        width: "100%",
                         height: KUTU_Y,
                         padding: "0 12px",
                         borderRadius: 14,
@@ -999,7 +995,7 @@ export default function Home() {
                       title={favoriEklendi ? "Favorilerinden çıkar" : "Favorilere ekle"}
                       aria-label={favoriEklendi ? "Favorilerinden çıkar" : "Favorilere ekle"}
                       style={{
-                        width: KUTU_Y,
+                        width: "100%",
                         height: KUTU_Y,
                         padding: 0,
                         borderRadius: 14,
@@ -1126,7 +1122,10 @@ export default function Home() {
             {favoriMesaj && (
               <p style={{ margin: 0, fontSize: 12, color: "var(--vurgu)", fontWeight: 600 }}>{favoriMesaj}</p>
             )}
-          </section>          <section
+          </section>
+
+          {/* ALT KISIM: Sekmeli Kategori Alanı */}          
+          <section
             style={{
               padding: 24,
               background: "var(--kart)",
