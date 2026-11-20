@@ -25,6 +25,8 @@ const ARAC_LINKLERI = [
   { href: "/takip", ikon: "⏱️", ad: "İnşaatçı Takipçisi", aciklama: "İnşaatçı, lab & iksir geri sayımı" },
   { href: "/hesaplayici", ikon: "🧮", ad: "Hesaplayıcılar", aciklama: "Duvar, süre ve cevher maliyeti" },
   { href: "/karsilastir", ikon: "⚡", ad: "VS Karşılaştır", aciklama: "İki köyü veya klanı yan yana kıyasla" },
+  { href: "/savas-plan", ikon: "🎯", ad: "Savaş Planlayıcı", aciklama: "Klan savaşı & CWL hedef dağıtımı" },
+  { href: "/madalya", ikon: "💎", ad: "Madalya Optimizatörü", aciklama: "CWL madalyası: Çekiç mi İksir mi?" },
 ];
 
 const REHBER_LINKLERI = [

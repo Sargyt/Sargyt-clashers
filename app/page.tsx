@@ -9,6 +9,7 @@ import ProfilKartiModali from "./ProfilKartiModeli";
 import { tr, ligTr } from "./isimler";
 import KoyYasiKarti from "./KoyYasiKarti";
 import GelisimGecmisi from "./GelisimGecmisi";
+import EkipmanDanismani from "./EkipmanDanismani";
 
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
@@ -1394,6 +1395,7 @@ export default function Home() {
             )}
           </section>
 
+<EkipmanDanismani ekipmanlar={oyuncu.ekipmanlar} />
           <GelisimGecmisi
             kod={oyuncu.kod}
             thSeviyesi={oyuncu.thSeviyesi}
