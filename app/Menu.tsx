@@ -27,6 +27,12 @@ const ARAC_LINKLERI = [
   { href: "/karsilastir", ikon: "⚡", ad: "VS Karşılaştır", aciklama: "İki köyü veya klanı yan yana kıyasla" },
   { href: "/savas-plan", ikon: "🎯", ad: "Savaş Planlayıcı", aciklama: "Klan savaşı & CWL hedef dağıtımı" },
   { href: "/madalya", ikon: "💎", ad: "Madalya Optimizatörü", aciklama: "CWL madalyası: Çekiç mi İksir mi?" },
+  { href: "/zapquake", ikon: "⚡", ad: "ZapQuake Hesaplayıcı", aciklama: "Yıldırım + Deprem + Dev Ok hesabı" },
+  { href: "/liderlik", ikon: "🏆", ad: "Liderlik Tablosu", aciklama: "Siteye girilen en güçlü köyler" },
+  { href: "/baskent", ikon: "🏰", ad: "Klan Başkenti", aciklama: "Bölge baskın orduları & madalya sepeti" },
+  { href: "/quiz", ikon: "🧠", ad: "CoC Bilgi Yarışması", aciklama: "10 soruda Clash rütbeni test et" },
+  { href: "/ordu-kurucu", ikon: "🧪", ad: "Ordu Kurucu", aciklama: "Kendi ordunu kur, kapasite hesapla" },
+  
 ];
 
 const REHBER_LINKLERI = [

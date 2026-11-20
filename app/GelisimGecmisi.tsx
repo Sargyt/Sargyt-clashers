@@ -10,6 +10,8 @@ export type ParcaOzet = {
 };
 
 type Detaylar = {
+  isim?: string; 
+  klan?: string | null;
   kahramanlar?: Record<string, number>;
   ekipmanlar?: Record<string, number>;
   birlikler?: Record<string, number>;
@@ -90,6 +92,8 @@ function metrikDegeri(k: Kayit, metrik: Metrik): number {
 
 export default function GelisimGecmisi({
   kod,
+  isim,
+  klan,
   thSeviyesi,
   genelYuzde,
   kupa,
@@ -100,6 +104,8 @@ export default function GelisimGecmisi({
   petler,
 }: {
   kod: string;
+  isim?: string;
+  klan?: string | null;
   thSeviyesi: number;
   genelYuzde: number;
   kupa: number;
@@ -108,7 +114,8 @@ export default function GelisimGecmisi({
   birlikler: ParcaOzet[];
   buyuler: ParcaOzet[];
   petler: ParcaOzet[];
-}) {
+}) {  
+  
   const [kayitlar, setKayitlar] = useState<Kayit[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [metrik, setMetrik] = useState<Metrik>("genel_yuzde");
@@ -129,6 +136,8 @@ export default function GelisimGecmisi({
       birlikler: haritaYap(birlikler),
       buyuler: haritaYap(buyuler),
       petler: haritaYap(petler),
+      isim,
+      klan,
       ekipmanToplam,
       labYuzde,
     };

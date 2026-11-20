@@ -1397,6 +1397,8 @@ export default function Home() {
 
 <EkipmanDanismani ekipmanlar={oyuncu.ekipmanlar} />
           <GelisimGecmisi
+          isim={oyuncu.isim}
+            klan={oyuncu.klan}
             kod={oyuncu.kod}
             thSeviyesi={oyuncu.thSeviyesi}
             genelYuzde={yuzde(hepsi)}
