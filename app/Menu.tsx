@@ -34,6 +34,7 @@ const ARAC_GRUPLARI: { baslik: string; ogeler: AracLink[] }[] = [
       { href: "/duzenler", ikon: "🗺️", ad: "Köy Düzenleri", aciklama: "Oyuna kopyalanabilir güncel düzenler" },
       { href: "/savas-plan", ikon: "🎯", ad: "Savaş Planlayıcı", aciklama: "Klan savaşı & CWL hedef dağıtımı" },
       { href: "/zapquake", ikon: "⚡", ad: "ZapQuake Hesaplayıcı", aciklama: "Yıldırım + Deprem + Dev Ok hesabı" },
+      { href: "/efsane", ikon: "🏆", ad: "Efsane Ligi Takibi", aciklama: "8 saldırı & 8 savunma kupa defteri" },
     ],
   },
   {
