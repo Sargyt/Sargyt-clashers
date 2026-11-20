@@ -2,92 +2,98 @@
 
 /* 1. EJDERHA ATEŞİ (Varsayılan) */
 :root,
-html[data-theme="altin-koyu"] {
+:root[data-theme="altin-koyu"],
+[data-theme="altin-koyu"] {
   --bg: #12100c;
   --fg: #f2efe6;
   --kart: #1b1812;
   --cizgi: #332d21;
   --vurgu: #f0b429;
+  --vurgu-yazi: #111111;
+  --kontur: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 6px rgba(0, 0, 0, 0.7);
   --leke-1: rgba(240, 180, 41, 0.20);
   --leke-2: rgba(180, 110, 15, 0.22);
   --leke-3: rgba(255, 205, 80, 0.10);
-  --kontur: #000000;
-  --serit-bg: rgba(240, 180, 41, 0.12);
   color-scheme: dark;
 }
 
 /* 2. HİÇLİK MORU */
-html[data-theme="mor-siyah"] {
+:root[data-theme="mor-siyah"],
+[data-theme="mor-siyah"] {
   --bg: #0d0a14;
   --fg: #ece8f5;
   --kart: #1a1424;
   --cizgi: #2e2540;
   --vurgu: #a78bfa;
+  --vurgu-yazi: #111111;
+  --kontur: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 6px rgba(0, 0, 0, 0.75);
   --leke-1: rgba(167, 139, 250, 0.24);
   --leke-2: rgba(109, 40, 217, 0.26);
   --leke-3: rgba(196, 181, 253, 0.12);
-  --kontur: #050308;
-  --serit-bg: rgba(167, 139, 250, 0.14);
   color-scheme: dark;
 }
 
 /* 3. KANLI AY */
-html[data-theme="kanli-ay"] {
+:root[data-theme="kanli-ay"],
+[data-theme="kanli-ay"] {
   --bg: #080607;
   --fg: #f3eaec;
   --kart: #120c0e;
   --cizgi: #2d181e;
   --vurgu: #c81d38;
+  --vurgu-yazi: #ffffff;
+  --kontur: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 6px rgba(0, 0, 0, 0.8);
   --leke-1: rgba(185, 20, 46, 0.28);
   --leke-2: rgba(120, 10, 30, 0.30);
   --leke-3: rgba(220, 38, 68, 0.14);
-  --kontur: #000000;
-  --serit-bg: rgba(200, 29, 56, 0.15);
   color-scheme: dark;
 }
 
 /* 4. ZEHİRLİ SARMAŞIK */
-html[data-theme="zumrut-orman"] {
+:root[data-theme="zumrut-orman"],
+[data-theme="zumrut-orman"] {
   --bg: #070e0b;
   --fg: #e6f4ed;
   --kart: #0e1b15;
   --cizgi: #1d362a;
   --vurgu: #10b981;
+  --vurgu-yazi: #081510;
+  --kontur: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 6px rgba(0, 0, 0, 0.75);
   --leke-1: rgba(16, 185, 129, 0.22);
   --leke-2: rgba(6, 95, 70, 0.26);
   --leke-3: rgba(52, 211, 153, 0.11);
-  --kontur: #020805;
-  --serit-bg: rgba(16, 185, 129, 0.13);
   color-scheme: dark;
 }
 
 /* 5. ELEKTRO TİTAN */
-html[data-theme="buzul-efsane"] {
+:root[data-theme="buzul-efsane"],
+[data-theme="buzul-efsane"] {
   --bg: #070b12;
   --fg: #e6eef8;
   --kart: #0e1624;
   --cizgi: #1e2f4d;
   --vurgu: #38bdf8;
+  --vurgu-yazi: #081220;
+  --kontur: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 6px rgba(0, 0, 0, 0.75);
   --leke-1: rgba(56, 189, 248, 0.22);
   --leke-2: rgba(14, 116, 144, 0.24);
   --leke-3: rgba(125, 211, 252, 0.11);
-  --kontur: #02060d;
-  --serit-bg: rgba(56, 189, 248, 0.13);
   color-scheme: dark;
 }
 
 /* 6. KRALİYET PARŞÖMENİ (Açık Tema) */
-html[data-theme="parsomen-acik"] {
+:root[data-theme="parsomen-acik"],
+[data-theme="parsomen-acik"] {
   --bg: #f5f2ea;
   --fg: #1b1815;
   --kart: #ffffff;
   --cizgi: #ded8c8;
   --vurgu: #b87308;
+  --vurgu-yazi: #ffffff;
+  --kontur: 0 1px 2px rgba(255, 255, 255, 0.75);
   --leke-1: rgba(200, 135, 11, 0.14);
   --leke-2: rgba(180, 110, 10, 0.12);
   --leke-3: rgba(220, 160, 30, 0.08);
-  --kontur: rgba(255, 255, 255, 0.9);
-  --serit-bg: rgba(184, 115, 8, 0.11);
   color-scheme: light;
 }
 
@@ -98,6 +104,7 @@ html[data-theme="parsomen-acik"] {
 html {
   -webkit-text-size-adjust: 100%;
   background-color: var(--bg);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -105,6 +112,7 @@ body {
   background-color: var(--bg);
   color: var(--fg);
   font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.55;
   min-height: 100vh;
   margin: 0;
 }
@@ -123,114 +131,108 @@ body::before {
     radial-gradient(ellipse 42% 24% at 48% 95%, var(--leke-2) 0%, transparent 65%);
 }
 
-/* ============================================================
-   OYUN TİPOGRAFİSİ & KESKİN KONTUR (STROKE) SİSTEMİ
-============================================================ */
+/* OYUN BAŞLIK TİPOGRAFİSİ */
 h1,
 h2,
 .oyun-baslik {
-  font-family: var(--font-baslik), system-ui, sans-serif;
-  letter-spacing: 0.25px;
-  line-height: 1.18;
-  text-shadow:
-    -1.2px -1.2px 0 var(--kontur),
-     1.2px -1.2px 0 var(--kontur),
-    -1.2px  1.2px 0 var(--kontur),
-     1.2px  1.2px 0 var(--kontur),
-     0px    3px   6px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-baslik), var(--font-geist-sans), system-ui, sans-serif;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
 }
 
-html[data-theme="parsomen-acik"] h1,
-html[data-theme="parsomen-acik"] h2,
-html[data-theme="parsomen-acik"] .oyun-baslik {
-  text-shadow:
-    0 1px 0 var(--kontur),
-    0 2px 5px rgba(80, 50, 10, 0.14);
+h1 {
+  text-shadow: var(--kontur);
 }
 
-/* ORTALANMIŞ ARKA PLANLI + ÇİZGİLİ BÖLÜM BAŞLIĞI (BANNER) */
 .baslik-serit {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  width: 100%;
-  margin: 4px 0 16px;
-}
-
-.baslik-serit::before,
-.baslik-serit::after {
-  content: "";
-  flex: 1;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, transparent, var(--vurgu));
-  opacity: 0.55;
-}
-
-.baslik-serit::after {
-  background: linear-gradient(90deg, var(--vurgu), transparent);
-}
-
-.baslik-serit > span {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  padding: 8px 22px;
-  border-radius: 12px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--vurgu) 18%, var(--kart)),
-    var(--kart)
-  );
-  border: 1.5px solid color-mix(in srgb, var(--vurgu) 65%, var(--cizgi));
-  box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  color: var(--fg);
+  padding: 6px 14px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--vurgu) 14%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--vurgu) 42%, var(--cizgi));
   font-family: var(--font-baslik), system-ui, sans-serif;
-  font-size: clamp(16px, 2.2vw, 20px);
   font-weight: 800;
-  text-align: center;
-  text-shadow:
-    -1.2px -1.2px 0 var(--kontur),
-     1.2px -1.2px 0 var(--kontur),
-    -1.2px  1.2px 0 var(--kontur),
-     1.2px  1.2px 0 var(--kontur),
-     0px    2px   5px rgba(0, 0, 0, 0.5);
+  letter-spacing: -0.01em;
 }
 
-html[data-theme="parsomen-acik"] .baslik-serit > span {
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
-  box-shadow: 0 3px 10px rgba(100, 70, 20, 0.12);
-}
-
+/* ETKİLEŞİM & ODAK CİLASI */
 a {
   color: var(--vurgu);
+  transition: opacity 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
 }
 
 input,
 select,
+textarea,
 button {
-  font-size: 16px;
+  font-size: 15.5px;
   font-family: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--vurgu);
+  outline-offset: 2px;
 }
 
 button {
-  min-height: 44px;
+  min-height: 40px;
 }
 
+button:not(:disabled):hover {
+  filter: brightness(1.06);
+}
+
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* İNCE TEMALI KAYDIRMA ÇUBUĞU */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cizgi);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vurgu);
+}
+
+/* MOBİL UYUM */
 @media (max-width: 768px) {
   nav {
     padding: 10px 14px !important;
-    gap: 6px !important;
+    gap: 7px !important;
   }
+
   main {
-    padding-left: 14px !important;
-    padding-right: 14px !important;
+    padding: 20px 14px !important;
   }
-  .baslik-serit > span {
-    padding: 7px 14px;
+
+  section {
+    padding: 18px 16px !important;
+  }
+
+  h1 {
+    font-size: 25px !important;
   }
 }

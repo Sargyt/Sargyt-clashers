@@ -421,7 +421,7 @@ function KlanlarIcerik() {
             borderRadius: 12,
             border: 0,
             background: "var(--vurgu)",
-            color: "#111",
+            color: "var(--vurgu-yazi)",
             fontWeight: 700,
             fontSize: 16,
             cursor: "pointer",
@@ -493,7 +493,7 @@ function KlanlarIcerik() {
                         padding: "4px 10px",
                         borderRadius: 8,
                         background: "var(--vurgu)",
-                        color: "#111",
+                        color: "var(--vurgu-yazi)",
                         fontWeight: 800,
                         fontSize: 13,
                       }}
@@ -717,7 +717,7 @@ function KlanlarIcerik() {
                         padding: "2px 8px",
                         borderRadius: 8,
                         background: "var(--vurgu)",
-                        color: "#111",
+                        color: "var(--vurgu-yazi)",
                         fontSize: 12,
                         fontWeight: 900,
                       }}

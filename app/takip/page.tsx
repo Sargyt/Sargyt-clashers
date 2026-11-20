@@ -408,7 +408,7 @@ export default function TakipSayfasi() {
                         borderRadius: 10,
                         border: 0,
                         background: "var(--vurgu)",
-                        color: "#111",
+                        color: "var(--vurgu-yazi)",
                         fontWeight: 800,
                         cursor: "pointer",
                       }}

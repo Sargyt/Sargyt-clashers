@@ -367,7 +367,7 @@ export default function MadalyaOptimizatoruSayfasi() {
                     <button
                       type="button"
                       onClick={() => adetDegistir(u.id, 1)}
-                      style={{ width: 30, height: 30, borderRadius: 8, border: 0, background: "var(--vurgu)", color: "#111", fontWeight: 900, cursor: "pointer" }}
+                      style={{ width: 30, height: 30, borderRadius: 8, border: 0, background: "var(--vurgu)", color: "var(--vurgu-yazi)", fontWeight: 900, cursor: "pointer" }}
                     >
                       +
                     </button>

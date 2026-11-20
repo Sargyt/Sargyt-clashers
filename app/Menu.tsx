@@ -105,7 +105,7 @@ export default function Menu() {
   const adminMi = kullaniciEposta?.toLowerCase() === "sargytr0@gmail.com";
   const aracAktifMi = ARAC_LINKLERI.some((a) => a.href === yol);
   const rehberAktifMi = REHBER_LINKLERI.some((r) => r.href === yol);
-  const aktifYaziRengi = tema === "kanli-ay" ? "#ffffff" : "#111111";
+  const aktifYaziRengi = "var(--vurgu-yazi)";
 
   return (
     <nav

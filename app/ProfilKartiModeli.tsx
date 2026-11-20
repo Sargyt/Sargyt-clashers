@@ -497,7 +497,7 @@ export default function ProfilKartiModali({
               borderRadius: 11,
               border: 0,
               background: "var(--vurgu)",
-              color: "#111",
+              color: "var(--vurgu-yazi)",
               fontWeight: 900,
               fontSize: 14,
               cursor: "pointer",

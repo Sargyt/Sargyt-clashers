@@ -8,17 +8,36 @@ type EkipmanParca = {
   azami: number;
 };
 
+type KahramanAdi =
+  | "Barbar Kral"
+  | "Okçu Kraliçe"
+  | "Büyük Koruyucu"
+  | "Kraliyet Şampiyonu"
+  | "Minyon Prens"
+  | "Ejder Dükü"
+  | "Diğer";
+
 type MetaBilgi = {
   sinif: "S" | "A" | "B" | "C";
-  kahraman: string;
+  kahraman: KahramanAdi;
   neden: string;
 };
 
+const KAHRAMAN_FILTRELERI: ("Tümü" | KahramanAdi)[] = [
+  "Tümü",
+  "Barbar Kral",
+  "Okçu Kraliçe",
+  "Büyük Koruyucu",
+  "Kraliyet Şampiyonu",
+  "Minyon Prens",
+  "Ejder Dükü",
+];
+
 const META_LISTE: Record<string, MetaBilgi> = {
-  // S-TİER (Önce bunları bas)
+  // S-TİER (Her ordunun çekirdeği — önce bunları bas)
   "Eternal Tome": { sinif: "S", kahraman: "Büyük Koruyucu", neden: "Her ordunun omurgası; dokunulmazlık süresi hayati." },
   "Healing Tome": { sinif: "S", kahraman: "Büyük Koruyucu", neden: "Sürekli can yenileme ile 3 yıldız garantisi." },
-  "Electro Boots": { sinif: "S", kahraman: "Kraliyet Şampiyonu", neden: "RC yürüyüşlerinin ve güncel metanın kralı." },
+  "Electro Boots": { sinif: "S", kahraman: "Kraliyet Şampiyonu", neden: "RC yürüyüşlerinin ve güncel metanın vazgeçilmezi." },
   "Spiky Ball": { sinif: "S", kahraman: "Barbar Kral", neden: "Tek tuşla 7–8 savunmayı temizleyen yüksek patlayıcı hasar." },
   "Earthquake Boots": { sinif: "S", kahraman: "Barbar Kral", neden: "Duvarları açar, Spiky Ball ile yıkıcı kombo yapar." },
   "Fireball": { sinif: "S", kahraman: "Büyük Koruyucu", neden: "Merkez savunmaları tek seferde silen turnuva silahı." },
@@ -26,27 +45,40 @@ const META_LISTE: Record<string, MetaBilgi> = {
   "Action Figure": { sinif: "S", kahraman: "Okçu Kraliçe", neden: "Devasa tanklama ve kraliçe ömrünü ciddi uzatma." },
   "Healer Puppet": { sinif: "S", kahraman: "Okçu Kraliçe", neden: "Kraliçe yürüyüşü olmadan bile ücretsiz şifacı desteği." },
   "Haste Vial": { sinif: "S", kahraman: "Kraliyet Şampiyonu", neden: "Kısa sürede çok sayıda savunma eriten hız patlaması." },
-  "Dark Orb": { sinif: "S", kahraman: "Minyon Prensi", neden: "Geniş alanda savunmaları dondurup yavaşlatan temel güç." },
+  "Dark Orb": { sinif: "S", kahraman: "Minyon Prens", neden: "Geniş alanda savunmaları yavaşlatan temel güç." },
+  "Fire Heart": { sinif: "S", kahraman: "Ejder Dükü", neden: "Ejder Dükü'nün ana hasar ve dayanıklılık çekirdeği." },
+  "Rocket Backpack": { sinif: "S", kahraman: "Ejder Dükü", neden: "Hızlı konumlanma ve kritik savunmalara ani baskın." },
 
   // A-TİER (Güçlü meta seçenekleri)
   "Rocket Spear": { sinif: "A", kahraman: "Kraliyet Şampiyonu", neden: "Uzun menzilden kritik savunmaları güvenle düşürür." },
+  "Frost Flake": { sinif: "A", kahraman: "Kraliyet Şampiyonu", neden: "Yakın savunmaları dondurup RC'nin hayatta kalmasını uzatır." },
   "Giant Gauntlet": { sinif: "A", kahraman: "Barbar Kral", neden: "Hasar azaltma + alan hasarı ile sağlam yer tanklığı." },
+  "Stick Horse": { sinif: "A", kahraman: "Barbar Kral", neden: "Yüksek hareket kabiliyeti ve hızlı hat yarma desteği." },
+  "Snake Bracelet": { sinif: "A", kahraman: "Barbar Kral", neden: "Kenar temizliği ve ekstra hedef dağıtma için güçlü." },
   "Giant Arrow": { sinif: "A", kahraman: "Okçu Kraliçe", neden: "Hava savunmalarını ve süpürücüleri harita boyu temizler." },
-  "Rage Gem": { sinif: "A", kahraman: "Büyük Koruyucu", neden: "Hava ve spam ordularında pasif yüksek hasar çarpanı." },
   "Frozen Arrow": { sinif: "A", kahraman: "Okçu Kraliçe", neden: "Kraliçe yürüyüşlerinde tekil savunmaları yavaşlatır." },
+  "Monolith Arrow": { sinif: "A", kahraman: "Okçu Kraliçe", neden: "Yüksek canlı ana savunmaları ve kahramanları eritir." },
   "Invisibility Vial": { sinif: "A", kahraman: "Okçu Kraliçe", neden: "Acil kaçış ve yüksek anlık hasar desteği." },
+  "Rage Gem": { sinif: "A", kahraman: "Büyük Koruyucu", neden: "Hava ve spam ordularında pasif yüksek hasar çarpanı." },
+  "Heroic Torch": { sinif: "A", kahraman: "Büyük Koruyucu", neden: "Yer ordularının duvar engeline takılmadan ilerlemesini sağlar." },
+  "Portal Pendant": { sinif: "A", kahraman: "Büyük Koruyucu", neden: "Taktiksel yeniden konumlandırma ve ordu kurtarma avantajı." },
   "Seeking Shield": { sinif: "A", kahraman: "Kraliyet Şampiyonu", neden: "Düşük canlı savunmaları tek tuşla bitirir." },
   "Hog Rider Puppet": { sinif: "A", kahraman: "Kraliyet Şampiyonu", neden: "RC'ye görünmezlik ve tanklayacak biniciler verir." },
   "Rage Vial": { sinif: "A", kahraman: "Barbar Kral", neden: "Hızlı temizlik ve yüksek tekil hasar." },
-  "Snake Bracelet": { sinif: "A", kahraman: "Barbar Kral", neden: "Kenar temizliği ve ekstra hedef dağıtma için güçlü." },
-  "Henchmen Puppet": { sinif: "A", kahraman: "Minyon Prensi", neden: "Hava saldırılarında ekstra hasar ve koruma." },
-  "Metal Pants": { sinif: "A", kahraman: "Minyon Prensi", neden: "Hava savunmalarına karşı yüksek dayanıklılık." },
-  "Dark Crown": { sinif: "A", kahraman: "Minyon Prensi", neden: "Uzayan savaşlarda giderek güçlenen pasif statlar." },
+  "Henchmen Puppet": { sinif: "A", kahraman: "Minyon Prens", neden: "Hava saldırılarında ekstra hasar ve koruma." },
+  "Metal Pants": { sinif: "A", kahraman: "Minyon Prens", neden: "Hava savunmalarına karşı yüksek dayanıklılık." },
+  "Dark Crown": { sinif: "A", kahraman: "Minyon Prens", neden: "Uzayan savaşlarda giderek güçlenen pasif statlar." },
+  "Meteor Staff": { sinif: "A", kahraman: "Minyon Prens", neden: "Geniş alan hasarıyla savunma kümelerini zayıflatır." },
+  "Flame Blower": { sinif: "A", kahraman: "Ejder Dükü", neden: "Ön hizada toplu bina ve savunma eritmek için ideal." },
+  "Electro Fangs": { sinif: "A", kahraman: "Ejder Dükü", neden: "Zincirleme hasarla bitişik savunmaları hızlıca temizler." },
 
-  // B-TİER (Duruma göre)
+  // B-TİER (Duruma göre / ikinci plan)
   "Life Gem": { sinif: "B", kahraman: "Büyük Koruyucu", neden: "Düşük canlı birliklerde (Binici/Madenci) işe yarar." },
   "Vampstache": { sinif: "B", kahraman: "Barbar Kral", neden: "Dış halka temizliğinde kralı hayatta tutar." },
   "Royal Gem": { sinif: "B", kahraman: "Kraliyet Şampiyonu", neden: "Diğer RC ekipmanları varken ikinci planda kalır." },
+  "Noble Iron": { sinif: "B", kahraman: "Minyon Prens", neden: "Uzun menzilli başlangıç hasarı; Dark Orb sonrası bakılabilir." },
+  "Stun Blaster": { sinif: "B", kahraman: "Ejder Dükü", neden: "Tekil hedefleri sersemletir; ana ekipmanlar sonrası basılabilir." },
+  "Revenge Deck": { sinif: "B", kahraman: "Diğer", neden: "Özel kombolarda iş yapar; önce ana S/A ekipmanlarını tamamla." },
 
   // C-TİER (Cevher harcamadan önce bekle)
   "Barbarian Puppet": { sinif: "C", kahraman: "Barbar Kral", neden: "Üst belediyelerde alan hasarına anında erir; cevherini sakla." },
@@ -54,7 +86,6 @@ const META_LISTE: Record<string, MetaBilgi> = {
   "Lavaloon Puppet": { sinif: "C", kahraman: "Büyük Koruyucu", neden: "Yıldızlı Cevher maliyeti yüksek, etki alanı dar." },
 };
 
-// Seviye başına yükseltme maliyeti (index = hedef seviye, 2..27)
 const PARLAK_MALIYET = [
   0, 0,
   120, 240, 400, 600, 840, 1120, 1440, 1800, 1900,
@@ -89,7 +120,7 @@ function sonrakiKirilim(seviye: number, azami: number): number {
   return Math.min(azami, kirilim);
 }
 
-const SINIF_PUAN: Record<MetaBilgi["sinif"], number> = { S: 4, A: 3, B: 2, C: 1 };
+const SINIF_PUAN: Record<MetaBilgi["sinif"], number> = { S: 400, A: 300, B: 200, C: 100 };
 const SINIF_RENK: Record<MetaBilgi["sinif"], { yazi: string; arkaplan: string }> = {
   S: { yazi: "#f59e0b", arkaplan: "rgba(245, 158, 11, 0.16)" },
   A: { yazi: "#38bdf8", arkaplan: "rgba(56, 189, 248, 0.16)" },
@@ -99,6 +130,7 @@ const SINIF_RENK: Record<MetaBilgi["sinif"], { yazi: string; arkaplan: string }>
 
 export default function EkipmanDanismani({ ekipmanlar }: { ekipmanlar: EkipmanParca[] }) {
   const [sadeceMeta, setSadeceMeta] = useState(true);
+  const [seciliKahraman, setSeciliKahraman] = useState<"Tümü" | KahramanAdi>("Tümü");
   const [tumuAcik, setTumuAcik] = useState(false);
 
   const eksikler = ekipmanlar
@@ -106,8 +138,8 @@ export default function EkipmanDanismani({ ekipmanlar }: { ekipmanlar: EkipmanPa
     .map((e) => {
       const destansiMi = e.azami > 18;
       const meta: MetaBilgi = META_LISTE[e.isim] ?? {
-        sinif: destansiMi ? "B" : "B",
-        kahraman: destansiMi ? "Destansı Ekipman" : "Standart Ekipman",
+        sinif: "B",
+        kahraman: "Diğer",
         neden: destansiMi
           ? "Destansı ekipman; Yıldızlı Cevherini önce S/A sınıfı ana ekipmanlara ayır."
           : "İhtiyacına göre 3'lü kırılım seviyelerine kadar yükseltebilirsin.",
@@ -115,24 +147,30 @@ export default function EkipmanDanismani({ ekipmanlar }: { ekipmanlar: EkipmanPa
       const hedef = sonrakiKirilim(e.seviye, e.azami);
       const kirilimMaliyet = cevherHesapla(e.seviye, hedef, destansiMi);
       const maxMaliyet = cevherHesapla(e.seviye, e.azami, destansiMi);
-      return { ...e, destansiMi, meta, hedef, kirilimMaliyet, maxMaliyet };
+
+      // Öncelik skoru: Meta sınıfı + kırılıma yakınlık + düşük seviye kritik ekipman bonusu
+      const sinifSkor = SINIF_PUAN[meta.sinif];
+      const dusukSeviyeBonusu = (meta.sinif === "S" || meta.sinif === "A") && e.seviye < 15 ? 45 : 0;
+      const kirilimYakinlik = (3 - (hedef - e.seviye)) * 12;
+      const oncelikPuani = sinifSkor + dusukSeviyeBonusu + kirilimYakinlik - e.seviye * 0.5;
+
+      return { ...e, destansiMi, meta, hedef, kirilimMaliyet, maxMaliyet, oncelikPuani };
     });
 
-  const oncelikliler = eksikler
+  const kahramanFiltreli =
+    seciliKahraman === "Tümü"
+      ? eksikler
+      : eksikler.filter((e) => e.meta.kahraman === seciliKahraman);
+
+  const oncelikliler = kahramanFiltreli
     .filter((e) => e.meta.sinif !== "C")
-    .sort((a, b) => {
-      const sinifFark = SINIF_PUAN[b.meta.sinif] - SINIF_PUAN[a.meta.sinif];
-      if (sinifFark !== 0) return sinifFark;
-      // Kırılıma en yakın ve yüksek seviye olanı öne al
-      return (a.hedef - a.seviye) - (b.hedef - b.seviye) || b.seviye - a.seviye;
-    });
+    .sort((a, b) => b.oncelikPuani - a.oncelikPuani);
 
-  const bekletilecekler = eksikler.filter((e) => e.meta.sinif === "C");
+  const bekletilecekler = kahramanFiltreli.filter((e) => e.meta.sinif === "C");
 
-  // Toplam kalan cevher bilançosu
   const bilancoListesi = sadeceMeta
-    ? eksikler.filter((e) => e.meta.sinif === "S" || e.meta.sinif === "A")
-    : eksikler;
+    ? kahramanFiltreli.filter((e) => e.meta.sinif === "S" || e.meta.sinif === "A")
+    : kahramanFiltreli;
 
   const toplamCevher = bilancoListesi.reduce(
     (acc, e) => ({
@@ -159,7 +197,7 @@ export default function EkipmanDanismani({ ekipmanlar }: { ekipmanlar: EkipmanPa
         gap: 18,
       }}
     >
-      {/* ÜST BAŞLIK & FİLTRE */}
+      {/* ÜST BAŞLIK & BÜTÇE FİLTRESİ */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <div>
           <h2 className="baslik-serit" style={{ margin: 0, fontSize: 18 }}>
@@ -179,7 +217,7 @@ export default function EkipmanDanismani({ ekipmanlar }: { ekipmanlar: EkipmanPa
               borderRadius: 10,
               border: "1px solid " + (sadeceMeta ? "var(--vurgu)" : "var(--cizgi)"),
               background: sadeceMeta ? "var(--vurgu)" : "var(--bg)",
-              color: sadeceMeta ? "#111" : "var(--fg)",
+              color: sadeceMeta ? "var(--vurgu-yazi)" : "var(--fg)",
               fontSize: 12.5,
               fontWeight: 800,
               cursor: "pointer",
@@ -195,16 +233,50 @@ export default function EkipmanDanismani({ ekipmanlar }: { ekipmanlar: EkipmanPa
               borderRadius: 10,
               border: "1px solid " + (!sadeceMeta ? "var(--vurgu)" : "var(--cizgi)"),
               background: !sadeceMeta ? "var(--vurgu)" : "var(--bg)",
-              color: !sadeceMeta ? "#111" : "var(--fg)",
+              color: !sadeceMeta ? "var(--vurgu-yazi)" : "var(--fg)",
               fontSize: 12.5,
               fontWeight: 800,
               cursor: "pointer",
             }}
           >
-            📦 Tüm Ekipmanlar ({eksikler.length})
+            📦 Tüm Ekipmanlar ({kahramanFiltreli.length})
           </button>
         </div>
       </div>
+
+      {/* KAHRAMAN FİLTRE ŞERİDİ */}
+      {eksikler.length > 0 && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {KAHRAMAN_FILTRELERI.map((k) => {
+            const adet = k === "Tümü" ? eksikler.length : eksikler.filter((e) => e.meta.kahraman === k).length;
+            if (k !== "Tümü" && adet === 0) return null;
+            const secili = seciliKahraman === k;
+            return (
+              <button
+                key={k}
+                type="button"
+                onClick={() => {
+                  setSeciliKahraman(k);
+                  setTumuAcik(false);
+                }}
+                style={{
+                  padding: "6px 11px",
+                  minHeight: 34,
+                  borderRadius: 9,
+                  border: "1px solid " + (secili ? "var(--vurgu)" : "var(--cizgi)"),
+                  background: secili ? "var(--vurgu)" : "var(--bg)",
+                  color: secili ? "var(--vurgu-yazi)" : "var(--fg)",
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                {k} ({adet})
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {eksikler.length === 0 ? (
         <div

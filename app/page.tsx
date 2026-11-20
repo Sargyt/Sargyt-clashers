@@ -848,7 +848,7 @@ export default function Home() {
               borderRadius: 12,
               border: 0,
               background: "var(--vurgu)",
-              color: "#111",
+              color: "var(--vurgu-yazi)",
               fontSize: 16,
               fontWeight: 800,
               cursor: "pointer",
@@ -956,7 +956,7 @@ export default function Home() {
                           padding: "4px 12px",
                           borderRadius: 10,
                           background: "var(--vurgu)",
-                          color: "#111",
+                          color: "var(--vurgu-yazi)",
                           fontWeight: 900,
                           fontSize: 14,
                         }}

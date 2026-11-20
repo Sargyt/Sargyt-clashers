@@ -28,20 +28,20 @@ const BB_TARIHCESI = [
 ];
 
 const YIL_ESIKLERI = [
-  { maksLow: 150_000, yil: 2012, aralik: "2012–2013", yuzdelik: 99, maksBb: 9 },
-  { maksLow: 550_000, yil: 2013, aralik: "2013–2014", yuzdelik: 97, maksBb: 10 },
-  { maksLow: 2_000_000, yil: 2014, aralik: "2014–2015", yuzdelik: 93, maksBb: 10 },
-  { maksLow: 5_000_000, yil: 2015, aralik: "2015–2016", yuzdelik: 88, maksBb: 11 },
-  { maksLow: 10_000_000, yil: 2016, aralik: "2016–2017", yuzdelik: 81, maksBb: 11 },
-  { maksLow: 17_000_000, yil: 2017, aralik: "2017–2018", yuzdelik: 73, maksBb: 11 },
-  { maksLow: 26_000_000, yil: 2018, aralik: "2018–2019", yuzdelik: 64, maksBb: 12 },
-  { maksLow: 38_000_000, yil: 2019, aralik: "2019–2020", yuzdelik: 55, maksBb: 13 },
-  { maksLow: 52_000_000, yil: 2020, aralik: "2020–2021", yuzdelik: 46, maksBb: 13 },
-  { maksLow: 70_000_000, yil: 2021, aralik: "2021–2022", yuzdelik: 37, maksBb: 14 },
-  { maksLow: 90_000_000, yil: 2022, aralik: "2022–2023", yuzdelik: 28, maksBb: 15 },
-  { maksLow: 115_000_000, yil: 2023, aralik: "2023–2024", yuzdelik: 19, maksBb: 16 },
-  { maksLow: 145_000_000, yil: 2024, aralik: "2024–2025", yuzdelik: 11, maksBb: 17 },
-  { maksLow: 180_000_000, yil: 2025, aralik: "2025–2026", yuzdelik: 5, maksBb: 18 },
+  { maksLow: 300_000, yil: 2012, aralik: "2012–2013", yuzdelik: 99, maksBb: 9 },
+  { maksLow: 1_200_000, yil: 2013, aralik: "2013–2014", yuzdelik: 96, maksBb: 10 },
+  { maksLow: 3_500_000, yil: 2014, aralik: "2014–2015", yuzdelik: 92, maksBb: 10 },
+  { maksLow: 7_500_000, yil: 2015, aralik: "2015–2016", yuzdelik: 86, maksBb: 11 },
+  { maksLow: 12_500_000, yil: 2016, aralik: "2016–2017", yuzdelik: 79, maksBb: 11 },
+  { maksLow: 18_000_000, yil: 2017, aralik: "2017–2018", yuzdelik: 71, maksBb: 11 },
+  { maksLow: 23_500_000, yil: 2018, aralik: "2018–2019", yuzdelik: 63, maksBb: 12 },
+  { maksLow: 28_500_000, yil: 2019, aralik: "2019–2020", yuzdelik: 54, maksBb: 13 },
+  { maksLow: 33_000_000, yil: 2020, aralik: "2020–2021", yuzdelik: 45, maksBb: 13 },
+  { maksLow: 37_000_000, yil: 2021, aralik: "2021–2022", yuzdelik: 36, maksBb: 14 },
+  { maksLow: 46_000_000, yil: 2022, aralik: "2022–2023", yuzdelik: 27, maksBb: 15 },
+  { maksLow: 58_000_000, yil: 2023, aralik: "2023–2024", yuzdelik: 18, maksBb: 16 },
+  { maksLow: 74_000_000, yil: 2024, aralik: "2024–2025", yuzdelik: 10, maksBb: 17 },
+  { maksLow: 95_000_000, yil: 2025, aralik: "2025–2026", yuzdelik: 4, maksBb: 18 },
 ];
 
 function koddanYasTahmin(hamKod: string) {
@@ -427,7 +427,7 @@ export default function KoyYasiKarti({
                 borderRadius: 12,
                 border: 0,
                 background: "var(--vurgu)",
-                color: "#111",
+                color: "var(--vurgu-yazi)",
                 fontSize: 14,
                 fontWeight: 900,
                 cursor: "pointer",

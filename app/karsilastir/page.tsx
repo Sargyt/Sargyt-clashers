@@ -65,7 +65,7 @@ function KazananRozeti({ goster }: { goster: boolean }) {
         padding: "2px 8px",
         borderRadius: 6,
         background: "#22c55e",
-        color: "#111",
+        color: "var(--vurgu-yazi)",
         fontSize: 11,
         fontWeight: 900,
       }}
@@ -243,7 +243,7 @@ export default function KarsilastirSayfasi() {
               borderRadius: 12,
               border: 0,
               background: "var(--vurgu)",
-              color: "#111",
+              color: "var(--vurgu-yazi)",
               fontWeight: 800,
               fontSize: 16,
               cursor: "pointer",

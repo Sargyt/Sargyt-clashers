@@ -1004,7 +1004,7 @@ export default function Ordular() {
                   padding: "10px 18px",
                   borderRadius: 11,
                   background: "var(--vurgu)",
-                  color: "#111",
+                  color: "var(--vurgu-yazi)",
                   textDecoration: "none",
                   fontSize: 14,
                   fontWeight: 800,
@@ -1040,7 +1040,7 @@ export default function Ordular() {
                     padding: "4px 10px",
                     borderRadius: 8,
                     background: "#f59e0b",
-                    color: "#111",
+                    color: "var(--vurgu-yazi)",
                     fontWeight: 800,
                   }}
                 >
@@ -1603,7 +1603,7 @@ export default function Ordular() {
                 borderRadius: 10,
                 border: 0,
                 background: "var(--vurgu)",
-                color: "#111",
+                color: "var(--vurgu-yazi)",
                 fontWeight: 800,
                 cursor: "pointer",
               }}
@@ -1865,7 +1865,7 @@ export default function Ordular() {
                     padding: "3px 9px",
                     borderRadius: 6,
                     background: o.sargytOzel ? "#f59e0b" : o.kullaniciOrdusu ? "#22c55e" : "var(--vurgu)",
-                    color: "#111",
+                    color: "var(--vurgu-yazi)",
                     fontWeight: 800,
                   }}
                 >
@@ -1920,7 +1920,7 @@ export default function Ordular() {
                         padding: "6px 12px",
                         borderRadius: 8,
                         background: "var(--vurgu)",
-                        color: "#111",
+                        color: "var(--vurgu-yazi)",
                         textDecoration: "none",
                         fontSize: 12,
                         fontWeight: 800,
