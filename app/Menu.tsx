@@ -21,6 +21,7 @@ const ANA_LINKLER = [
 ];
 
 const ARAC_LINKLERI = [
+  { href: "/takip", ikon: "⏱️", ad: "İnşaatçı Takipçisi", aciklama: "İnşaatçı, lab & iksir geri sayımı" },
   { href: "/ordular", ikon: "⚔️", ad: "Meta Ordular", aciklama: "3 yıldız ordu & ekipman dizilimleri" },
   { href: "/duzenler", ikon: "🗺️", ad: "Köy Düzenleri", aciklama: "Oyuna kopyalanabilir güncel düzenler" },
   { href: "/karsilastir", ikon: "⚡", ad: "VS Karşılaştır", aciklama: "İki köyü veya klanı yan yana kıyasla" },
