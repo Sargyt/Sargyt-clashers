@@ -22,18 +22,22 @@ const ANA_LINKLER = [
 
 const ARAC_LINKLERI = [
   { href: "/takip", ikon: "⏱️", ad: "İnşaatçı Takipçisi", aciklama: "İnşaatçı, lab & iksir geri sayımı" },
+  { href: "/hesaplayici", ikon: "🧮", ad: "Hesaplayıcılar", aciklama: "Duvar, süre ve cevher maliyeti" },
+  { href: "/karsilastir", ikon: "⚡", ad: "VS Karşılaştır", aciklama: "İki köyü veya klanı yan yana kıyasla" },
+];
+
+const REHBER_LINKLERI = [
   { href: "/ordular", ikon: "⚔️", ad: "Meta Ordular", aciklama: "3 yıldız ordu & ekipman dizilimleri" },
   { href: "/duzenler", ikon: "🗺️", ad: "Köy Düzenleri", aciklama: "Oyuna kopyalanabilir güncel düzenler" },
-  { href: "/karsilastir", ikon: "⚡", ad: "VS Karşılaştır", aciklama: "İki köyü veya klanı yan yana kıyasla" },
   { href: "/ansiklopedi", ikon: "📖", ad: "Oyun Rehberi", aciklama: "Kahraman, birlik ve savunma taktikleri" },
-  { href: "/hesaplayici", ikon: "🧮", ad: "Hesaplayıcılar", aciklama: "Duvar, süre ve cevher maliyeti" },
 ];
 
 export default function Menu() {
   const [tema, setTema] = useState("altin-koyu");
   const [kullaniciEposta, setKullaniciEposta] = useState<string | null>(null);
-  const [araclarAcik, setAraclarAcik] = useState(false);
-  const acilirRef = useRef<HTMLDivElement>(null);
+  const [acikMenu, setAcikMenu] = useState<"araclar" | "rehber" | null>(null);
+  const araclarRef = useRef<HTMLDivElement>(null);
+  const rehberRef = useRef<HTMLDivElement>(null);
 
   const yol = usePathname();
   const router = useRouter();
@@ -72,20 +76,21 @@ export default function Menu() {
     };
   }, []);
 
-  // Dışarı tıklandığında açılır kutuyu kapat
   useEffect(() => {
     function disariTikla(e: MouseEvent) {
-      if (acilirRef.current && !acilirRef.current.contains(e.target as Node)) {
-        setAraclarAcik(false);
+      const hedef = e.target as Node;
+      const araclardaMi = araclarRef.current?.contains(hedef);
+      const rehberdeMi = rehberRef.current?.contains(hedef);
+      if (!araclardaMi && !rehberdeMi) {
+        setAcikMenu(null);
       }
     }
     document.addEventListener("mousedown", disariTikla);
     return () => document.removeEventListener("mousedown", disariTikla);
   }, []);
 
-  // Sayfa değişince açılır kutuyu kapat
   useEffect(() => {
-    setAraclarAcik(false);
+    setAcikMenu(null);
   }, [yol]);
 
   async function cikisYap() {
@@ -96,6 +101,7 @@ export default function Menu() {
 
   const adminMi = kullaniciEposta?.toLowerCase() === "sargytr0@gmail.com";
   const aracAktifMi = ARAC_LINKLERI.some((a) => a.href === yol);
+  const rehberAktifMi = REHBER_LINKLERI.some((r) => r.href === yol);
   const aktifYaziRengi = tema === "kanli-ay" ? "#ffffff" : "#111111";
 
   return (
@@ -151,17 +157,17 @@ export default function Menu() {
         );
       })}
 
-      {/* AÇILIR ARAÇLAR & SİHİRBAZLAR KUTUSU */}
-      <div ref={acilirRef} style={{ position: "relative" }}>
+      {/* 1. AÇILIR MENÜ: ARAÇLAR */}
+      <div ref={araclarRef} style={{ position: "relative" }}>
         <button
           type="button"
-          onClick={() => setAraclarAcik((acik) => !acik)}
-          aria-expanded={araclarAcik}
+          onClick={() => setAcikMenu((m) => (m === "araclar" ? null : "araclar"))}
+          aria-expanded={acikMenu === "araclar"}
           style={{
             padding: "9px 15px",
             minHeight: 40,
             borderRadius: 11,
-            border: "1px solid " + (aracAktifMi || araclarAcik ? "var(--vurgu)" : "var(--cizgi)"),
+            border: "1px solid " + (aracAktifMi || acikMenu === "araclar" ? "var(--vurgu)" : "var(--cizgi)"),
             background: aracAktifMi ? "var(--vurgu)" : "var(--bg)",
             color: aracAktifMi ? aktifYaziRengi : "var(--fg)",
             fontWeight: 700,
@@ -173,10 +179,10 @@ export default function Menu() {
           }}
         >
           <span>🧰 Araçlar</span>
-          <span style={{ fontSize: 11, opacity: 0.85 }}>{araclarAcik ? "▲" : "▼"}</span>
+          <span style={{ fontSize: 11, opacity: 0.85 }}>{acikMenu === "araclar" ? "▲" : "▼"}</span>
         </button>
 
-        {araclarAcik && (
+        {acikMenu === "araclar" && (
           <div
             style={{
               position: "absolute",
@@ -200,7 +206,7 @@ export default function Menu() {
                 <Link
                   key={a.href}
                   href={a.href}
-                  onClick={() => setAraclarAcik(false)}
+                  onClick={() => setAcikMenu(null)}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -208,19 +214,89 @@ export default function Menu() {
                     padding: "10px 12px",
                     borderRadius: 12,
                     border: "1px solid " + (aktif ? "var(--vurgu)" : "transparent"),
-                    background: aktif
-                      ? "color-mix(in srgb, var(--vurgu) 18%, var(--bg))"
-                      : "var(--bg)",
+                    background: aktif ? "color-mix(in srgb, var(--vurgu) 18%, var(--bg))" : "var(--bg)",
                     color: "var(--fg)",
                     textDecoration: "none",
                   }}
                 >
                   <span style={{ fontSize: 22, flexShrink: 0 }}>{a.ikon}</span>
                   <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    <strong style={{ fontSize: 14.5, color: aktif ? "var(--vurgu)" : "var(--fg)" }}>
-                      {a.ad}
-                    </strong>
+                    <strong style={{ fontSize: 14.5, color: aktif ? "var(--vurgu)" : "var(--fg)" }}>{a.ad}</strong>
                     <span style={{ fontSize: 12, opacity: 0.72 }}>{a.aciklama}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 2. AÇILIR MENÜ: REHBER & META */}
+      <div ref={rehberRef} style={{ position: "relative" }}>
+        <button
+          type="button"
+          onClick={() => setAcikMenu((m) => (m === "rehber" ? null : "rehber"))}
+          aria-expanded={acikMenu === "rehber"}
+          style={{
+            padding: "9px 15px",
+            minHeight: 40,
+            borderRadius: 11,
+            border: "1px solid " + (rehberAktifMi || acikMenu === "rehber" ? "var(--vurgu)" : "var(--cizgi)"),
+            background: rehberAktifMi ? "var(--vurgu)" : "var(--bg)",
+            color: rehberAktifMi ? aktifYaziRengi : "var(--fg)",
+            fontWeight: 700,
+            fontSize: 15,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span>📚 Rehber & Meta</span>
+          <span style={{ fontSize: 11, opacity: 0.85 }}>{acikMenu === "rehber" ? "▲" : "▼"}</span>
+        </button>
+
+        {acikMenu === "rehber" && (
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 10px)",
+              left: 0,
+              width: "min(310px, 88vw)",
+              padding: 10,
+              borderRadius: 16,
+              background: "var(--kart)",
+              border: "1.5px solid var(--vurgu)",
+              boxShadow: "0 16px 40px rgba(0, 0, 0, 0.45)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              zIndex: 50,
+            }}
+          >
+            {REHBER_LINKLERI.map((r) => {
+              const aktif = yol === r.href;
+              return (
+                <Link
+                  key={r.href}
+                  href={r.href}
+                  onClick={() => setAcikMenu(null)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "10px 12px",
+                    borderRadius: 12,
+                    border: "1px solid " + (aktif ? "var(--vurgu)" : "transparent"),
+                    background: aktif ? "color-mix(in srgb, var(--vurgu) 18%, var(--bg))" : "var(--bg)",
+                    color: "var(--fg)",
+                    textDecoration: "none",
+                  }}
+                >
+                  <span style={{ fontSize: 22, flexShrink: 0 }}>{r.ikon}</span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <strong style={{ fontSize: 14.5, color: aktif ? "var(--vurgu)" : "var(--fg)" }}>{r.ad}</strong>
+                    <span style={{ fontSize: 12, opacity: 0.72 }}>{r.aciklama}</span>
                   </div>
                 </Link>
               );

@@ -7,6 +7,7 @@ import { gorselYolu } from "./gorseller";
 import OyunSayaclari from "./OyunSayaclari";
 import ProfilKartiModali from "./ProfilKartiModeli";
 import { tr, ligTr } from "./isimler";
+import KoyYasiKarti from "./KoyYasiKarti";
 
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
@@ -34,8 +35,7 @@ type Oyuncu = {
   ekipmanlar: Parca[];
 };
 
-type SekmeTipi = "kahramanlar" | "laboratuvar" | "ekipmanlar" | "petler";
-
+type SekmeTipi = "kahramanlar" | "laboratuvar" | "ekipmanlar" | "petler"
 // KIŞLA AÇILMA ÖNCELİĞİNE GÖRE KESİN SIRALAMA LİSTELERİ
 const IKSIR_BIRLIK_SIRASI = [
   "Barbarian",
@@ -586,6 +586,7 @@ export default function Home() {
   const [favoriMesaj, setFavoriMesaj] = useState("");
   const [aktifSekme, setAktifSekme] = useState<SekmeTipi>("kahramanlar");
   const [profilKartiAcik, setProfilKartiAcik] = useState(false);
+  const [koyYasiAcik, setKoyYasiAcik] = useState(false);
 
   async function favoriyeEkle(o: Oyuncu) {
     const { data } = await supabase.auth.getSession();
@@ -964,6 +965,31 @@ export default function Home() {
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => setKoyYasiAcik(true)}
+                      style={{
+                        width: "100%",
+                        height: KUTU_Y,
+                        padding: "0 12px",
+                        borderRadius: 14,
+                        border: "2px solid var(--vurgu)",
+                        background: "rgba(245, 197, 66, 0.16)",
+                        color: "var(--vurgu)",
+                        cursor: "pointer",
+                        fontSize: 15,
+                        fontWeight: 900,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 8,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <span style={{ fontSize: 18 }}>🎴</span>
+                      <span>⏳ Köy Yaşı</span>
+                    </button>
+                    
                     <button
                       type="button"
                       onClick={() => setProfilKartiAcik(true)}
@@ -1385,8 +1411,12 @@ export default function Home() {
             hayvanOrt: yuzde(petler),
             takimKislasiSv: takimKislasiSeviyesi,
           }}
-          onKapat={() => setProfilKartiAcik(false)}
+       onKapat={() => setProfilKartiAcik(false)}
         />
+      )}
+
+      {oyuncu && koyYasiAcik && (
+        <KoyYasiKarti oyuncu={oyuncu} onKapat={() => setKoyYasiAcik(false)} />
       )}
     </main>
   );
