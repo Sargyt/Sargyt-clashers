@@ -17,6 +17,7 @@ const ANA_LINKLER = [
   { href: "/", ad: "Ana Sayfa" },
   { href: "/klanlar", ad: "Klanlar" },
   { href: "/forum", ad: "Forum" },
+  { href: "/ilanlar", ad: "İlanlar" },
   { href: "/favoriler", ad: "Favoriler" },
 ];
 

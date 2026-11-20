@@ -8,6 +8,7 @@ import OyunSayaclari from "./OyunSayaclari";
 import ProfilKartiModali from "./ProfilKartiModeli";
 import { tr, ligTr } from "./isimler";
 import KoyYasiKarti from "./KoyYasiKarti";
+import GelisimGecmisi from "./GelisimGecmisi";
 
 const KOD_KURALI = /^[0289PYLQGRJCUV]{3,12}$/;
 
@@ -986,7 +987,7 @@ export default function Home() {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      <span style={{ fontSize: 18 }}>🎴</span>
+                      <span style={{ fontSize: 18 }}></span>
                       <span>⏳ Köy Yaşı</span>
                     </button>
                     
@@ -1392,7 +1393,20 @@ export default function Home() {
               </div>
             )}
           </section>
+
+          <GelisimGecmisi
+            kod={oyuncu.kod}
+            thSeviyesi={oyuncu.thSeviyesi}
+            genelYuzde={yuzde(hepsi)}
+            kupa={oyuncu.kupa}
+            kahramanlar={oyuncu.kahramanlar}
+            ekipmanlar={oyuncu.ekipmanlar}
+            birlikler={[...iksirBirlikleri, ...karaIksirBirlikleri]}
+            buyuler={[...iksirBuyuleri, ...karaIksirBuyuleri]}
+            petler={petler}
+          />
         </div>
+ 
       )}
       {oyuncu && profilKartiAcik && (
         <ProfilKartiModali

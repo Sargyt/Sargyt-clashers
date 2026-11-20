@@ -375,6 +375,22 @@ export default function KoyYasiKarti({
           </div>
         </div>
 
+{/* TAHMİNİ VERİ UYARISI */}
+        <div
+          style={{
+            padding: "10px 14px",
+            borderRadius: 12,
+            background: "rgba(245, 158, 11, 0.12)",
+            border: "1px solid rgba(245, 158, 11, 0.45)",
+            color: "#fbbf24",
+            fontSize: 13,
+            fontWeight: 600,
+            textAlign: "center",
+            lineHeight: 1.45,
+          }}
+        >
+          ⚠️ Bilgilendirme: Resmi Clash of Clans API&apos;si hesap kuruluş tarihini paylaşmadığı için buradaki yıl ve dönem bilgileri köy koduna göre tahmin edilmektedir; bilgiler birebir doğru olmayabilir.
+        </div>
         {/* ANA YIL GÖSTERGESİ */}
         <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 14, opacity: 0.72, fontWeight: 600 }}>Tahmini başlangıç dönemi</span>
