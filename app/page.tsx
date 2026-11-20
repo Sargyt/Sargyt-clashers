@@ -177,32 +177,46 @@ function siralaListe(liste: Parca[], referansSira: string[]): Parca[] {
 
 const VITRIN_KARTLARI = [
   {
-    href: "/hesaplayici",
-    ikon: "🧱",
-    baslik: "Gelişim & Maliyet Hesaplayıcıları",
+    href: "/savas-plan",
+    ikon: "🎯",
+    baslik: "Savaş & CWL Hedef Planlayıcı",
     aciklama:
-      "Duvar basım maliyetlerini, Altın Bilet (%10-%20) indirim avantajını, kahraman ekipmanları için gereken Cevher (Ore) miktarını ve inşaat sürelerini tek ekranda hesapla.",
+      "Aktif savaş kadronu çek, tek tıkla Ayna veya Kaydırmalı strateji dağıt ve WhatsApp/Discord'a hazır savaş emri kopyala.",
   },
   {
-    href: "/ansiklopedi",
-    ikon: "📖",
-    baslik: "Kapsamlı Oyun Ansiklopedisi",
+    href: "/zapquake",
+    ikon: "⚡",
+    baslik: "ZapQuake & Ordu Araçları",
     aciklama:
-      "Ejder Dükü dahil 6 Kahramanın yeteneklerini, Kuşatma Makinelerini, iksir & kara iksir birliklerini, büyüleri ve savunma yapılarının taktik zayıflıklarını incele.",
+      "Yıldırım + Deprem + Dev Ok hasarını hesapla, en az büyü alanıyla savunmaları indir.",
+  },
+  {
+    href: "/ordu-kurucu",
+    ikon: "🧪",
+    baslik: "İnteraktif Ordu Kurucu",
+    aciklama:
+      "Belediye seviyene göre kendi ordunu kur, kamp ve büyü kapasiteni canlı takip edip klan grubuna paylaş.",
+  },
+  {
+    href: "/madalya",
+    ikon: "💎",
+    baslik: "CWL & Başkent Optimizatörü",
+    aciklama:
+      "Çekiç mi İksir mi daha kârlı? Altın Bilet indirimiyle CWL madalyalarını en verimli şekilde harca.",
+  },
+  {
+    href: "/liderlik",
+    ikon: "🏆",
+    baslik: "Sargyt Liderlik Tablosu",
+    aciklama:
+      "Siteye girilen en yüksek tamamlama yüzdeli, kupalı ve güçlü kahramanlı köylerin canlı sıralaması.",
   },
   {
     href: "/klanlar",
     ikon: "🛡️",
     baslik: "Canlı Klan & Savaş Analizi",
     aciklama:
-      "Klan etiketini girerek güncel Klan Savaşı ve CWL skorlarını, kazanma serisini, Belediye Binası dağılımını ve üyelerin bağış/kupa performansını anında takip et.",
-  },
-  {
-    href: "/ordular",
-    ikon: "⚔️",
-    baslik: "Meta Ordular & Saldırı Taktikleri",
-    aciklama:
-      "Belediye Binası seviyene özel en güçlü 3 yıldız ordu kombinasyonlarını, kahraman ekipman eşleşmelerini, büyü dağılımlarını ve tek tıkla oyuna aktarma bağlantılarını keşfet.",
+      "Klan etiketini gir; canlı savaş skorlarını, son 10 savaş geçmişini ve üye performanslarını anında takip et.",
   },
 ];
 

@@ -216,23 +216,61 @@ button:disabled {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--vurgu);
 }
+/* MASAÜSTÜ VE MOBİL MENÜ (768px ve üstü kesinlikle PC görünümü) */
+.menu-masaustu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  flex-wrap: wrap;
+}
 
-/* MOBİL UYUM */
-@media (max-width: 768px) {
+.menu-mobil-buton {
+  display: none;
+}
+
+.menu-mobil-panel {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .menu-masaustu {
+    display: none !important;
+  }
+
+  .menu-mobil-buton {
+    display: inline-flex !important;
+    margin-left: auto;
+  }
+
+  .menu-mobil-panel {
+    display: flex !important;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
   nav {
     padding: 10px 14px !important;
     gap: 7px !important;
   }
 
   main {
-    padding: 20px 14px !important;
+    padding: 16px 12px !important;
+    gap: 16px !important;
   }
 
   section {
-    padding: 18px 16px !important;
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
   }
 
   h1 {
-    font-size: 25px !important;
+    font-size: 22px !important;
+  }
+
+  h2 {
+    font-size: 17px !important;
   }
 }
